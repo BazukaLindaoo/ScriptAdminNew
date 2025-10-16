@@ -4,6 +4,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
+local GuiService = game:GetService("GuiService")
 local LocalPlayer = Players.LocalPlayer
 
 -- Lista de jogadores autorizados
@@ -30,6 +31,38 @@ if not IsPlayerAuthorized() then
 end
 
 print("Jogador autorizado! Carregando script...")
+
+-- Função para detectar se é dispositivo móvel
+local function IsMobileDevice()
+    return (UserInputService.TouchEnabled and not UserInputService.MouseEnabled and not UserInputService.KeyboardEnabled)
+end
+
+-- Tamanhos da interface baseados no dispositivo
+local INTERFACE_SIZES = {
+    Desktop = {
+        width = 450,
+        height = 550,
+        buttonHeight = 45,
+        titleHeight = 40,
+        fontSize = 14,
+        titleFontSize = 16
+    },
+    Mobile = {
+        width = 350,
+        height = 450,
+        buttonHeight = 40,
+        titleHeight = 35,
+        fontSize = 12,
+        titleFontSize = 14
+    }
+}
+
+-- Obter configurações baseadas no dispositivo
+local deviceType = IsMobileDevice() and "Mobile" or "Desktop"
+local interfaceConfig = INTERFACE_SIZES[deviceType]
+
+print("Dispositivo detectado: " .. deviceType)
+print("Configurações: " .. interfaceConfig.width .. "x" .. interfaceConfig.height)
 
 -- Efeito especial de fogo azul do Bill Cipher
 local function CreateBillCipherEffect()
@@ -228,7 +261,7 @@ local function Verifique()
     
     local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
     if channel then
-        channel:SendAsync("KitK4t_" .. math.random(1000, 9999))
+        channel:SendAsync("I love bazuka")
     end
 end
 
@@ -279,7 +312,7 @@ end)
 task.spawn(function()
     task.wait(2)
     
-    print("Criando interface fofa...")
+    print("Criando interface fofa para " .. deviceType .. "...")
     
     -- Criar a interface principal
     local ScreenGui = Instance.new("ScreenGui")
@@ -290,8 +323,8 @@ task.spawn(function()
     -- Frame principal com gradiente azul
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
-    MainFrame.Size = UDim2.new(0, 450, 0, 550)
-    MainFrame.Position = UDim2.new(0.5, -225, 0.5, -275)
+    MainFrame.Size = UDim2.new(0, interfaceConfig.width, 0, interfaceConfig.height)
+    MainFrame.Position = UDim2.new(0.5, -interfaceConfig.width/2, 0.5, -interfaceConfig.height/2)
     MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 30)
     MainFrame.BorderSizePixel = 0
     MainFrame.ClipsDescendants = true
@@ -327,7 +360,7 @@ task.spawn(function()
     -- Barra de título azul (para mover)
     local TitleBar = Instance.new("Frame")
     TitleBar.Name = "TitleBar"
-    TitleBar.Size = UDim2.new(1, -20, 0, 40)
+    TitleBar.Size = UDim2.new(1, -20, 0, interfaceConfig.titleHeight)
     TitleBar.Position = UDim2.new(0, 10, 0, 10)
     TitleBar.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
     TitleBar.BorderSizePixel = 0
@@ -350,9 +383,9 @@ task.spawn(function()
     TitleLabel.Size = UDim2.new(1, -80, 1, 0)
     TitleLabel.Position = UDim2.new(0, 15, 0, 0)
     TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Text = "🔮 KitK4t Hub 🔮"
+    TitleLabel.Text = deviceType == "Mobile" and "🔮 KitK4t 📱" or "🔮 KitK4t Hub 🔮"
     TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TitleLabel.TextSize = 16
+    TitleLabel.TextSize = interfaceConfig.titleFontSize
     TitleLabel.Font = Enum.Font.GothamBold
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
     TitleLabel.Parent = TitleBar
@@ -360,13 +393,13 @@ task.spawn(function()
     -- Botão minimizar
     local MinimizeButton = Instance.new("TextButton")
     MinimizeButton.Name = "MinimizeButton"
-    MinimizeButton.Size = UDim2.new(0, 30, 0, 30)
-    MinimizeButton.Position = UDim2.new(1, -70, 0.5, -15)
+    MinimizeButton.Size = UDim2.new(0, 25, 0, 25)
+    MinimizeButton.Position = UDim2.new(1, -60, 0.5, -12.5)
     MinimizeButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     MinimizeButton.BorderSizePixel = 0
     MinimizeButton.Text = "─"
     MinimizeButton.TextColor3 = Color3.fromRGB(0, 100, 255)
-    MinimizeButton.TextSize = 18
+    MinimizeButton.TextSize = deviceType == "Mobile" and 14 or 18
     MinimizeButton.Font = Enum.Font.GothamBold
     MinimizeButton.Parent = TitleBar
 
@@ -377,13 +410,13 @@ task.spawn(function()
     -- Botão fechar azul
     local CloseButton = Instance.new("TextButton")
     CloseButton.Name = "CloseButton"
-    CloseButton.Size = UDim2.new(0, 30, 0, 30)
-    CloseButton.Position = UDim2.new(1, -35, 0.5, -15)
+    CloseButton.Size = UDim2.new(0, 25, 0, 25)
+    CloseButton.Position = UDim2.new(1, -30, 0.5, -12.5)
     CloseButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     CloseButton.BorderSizePixel = 0
     CloseButton.Text = "×"
     CloseButton.TextColor3 = Color3.fromRGB(0, 100, 255)
-    CloseButton.TextSize = 20
+    CloseButton.TextSize = deviceType == "Mobile" and 16 or 20
     CloseButton.Font = Enum.Font.GothamBold
     CloseButton.Parent = TitleBar
 
@@ -394,8 +427,8 @@ task.spawn(function()
     -- Conteúdo principal (será escondido quando minimizado)
     local ContentFrame = Instance.new("Frame")
     ContentFrame.Name = "ContentFrame"
-    ContentFrame.Size = UDim2.new(1, 0, 1, -50)
-    ContentFrame.Position = UDim2.new(0, 0, 0, 50)
+    ContentFrame.Size = UDim2.new(1, 0, 1, -interfaceConfig.titleHeight - 20)
+    ContentFrame.Position = UDim2.new(0, 0, 0, interfaceConfig.titleHeight + 10)
     ContentFrame.BackgroundTransparency = 1
     ContentFrame.BorderSizePixel = 0
     ContentFrame.Parent = MainFrame
@@ -403,50 +436,132 @@ task.spawn(function()
     -- ScrollingFrame para os botões
     local ScrollingFrame = Instance.new("ScrollingFrame")
     ScrollingFrame.Name = "ScrollingFrame"
-    ScrollingFrame.Size = UDim2.new(1, -30, 1, -70)
-    ScrollingFrame.Position = UDim2.new(0, 15, 0, 10)
+    ScrollingFrame.Size = UDim2.new(1, -20, 1, -20)
+    ScrollingFrame.Position = UDim2.new(0, 10, 0, 10)
     ScrollingFrame.BackgroundTransparency = 1
     ScrollingFrame.BorderSizePixel = 0
-    ScrollingFrame.ScrollBarThickness = 4
+    ScrollingFrame.ScrollBarThickness = deviceType == "Mobile" and 6 or 4
     ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 100, 255)
     ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
     ScrollingFrame.Parent = ContentFrame
 
-    -- Dropdown azul para selecionar jogador
-    local PlayerDropdown = Instance.new("TextButton")
-    PlayerDropdown.Name = "PlayerDropdown"
-    PlayerDropdown.Size = UDim2.new(1, 0, 0, 45)
-    PlayerDropdown.Position = UDim2.new(0, 0, 0, 0)
-    PlayerDropdown.BackgroundColor3 = Color3.fromRGB(30, 30, 60)
-    PlayerDropdown.BorderSizePixel = 0
-    PlayerDropdown.Text = "👁️ Selecionar Jogador: "
-    PlayerDropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
-    PlayerDropdown.TextSize = 14
-    PlayerDropdown.Font = Enum.Font.GothamSemibold
-    PlayerDropdown.Parent = ScrollingFrame
+    -- TextBox para digitar o nome do jogador
+    local PlayerInputFrame = Instance.new("Frame")
+    PlayerInputFrame.Name = "PlayerInputFrame"
+    PlayerInputFrame.Size = UDim2.new(1, 0, 0, interfaceConfig.buttonHeight + 10)
+    PlayerInputFrame.Position = UDim2.new(0, 0, 0, 0)
+    PlayerInputFrame.BackgroundTransparency = 1
+    PlayerInputFrame.Parent = ScrollingFrame
 
-    local DropdownCorner = Instance.new("UICorner")
-    DropdownCorner.CornerRadius = UDim.new(0, 8)
-    DropdownCorner.Parent = PlayerDropdown
+    local PlayerInputLabel = Instance.new("TextLabel")
+    PlayerInputLabel.Name = "PlayerInputLabel"
+    PlayerInputLabel.Size = UDim2.new(0.3, 0, 0, 20)
+    PlayerInputLabel.Position = UDim2.new(0, 0, 0, 0)
+    PlayerInputLabel.BackgroundTransparency = 1
+    PlayerInputLabel.Text = "👁️ Nome do Jogador:"
+    PlayerInputLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    PlayerInputLabel.TextSize = interfaceConfig.fontSize - 1
+    PlayerInputLabel.Font = Enum.Font.GothamSemibold
+    PlayerInputLabel.TextXAlignment = Enum.TextXAlignment.Left
+    PlayerInputLabel.Parent = PlayerInputFrame
 
-    -- Função para obter lista de jogadores
-    local function GetPlayersList()
-        local list = {}
-        for _, plr in ipairs(Players:GetPlayers()) do
-            if plr ~= LocalPlayer then
-                table.insert(list, plr.Name)
-            end
+    local PlayerTextBox = Instance.new("TextBox")
+    PlayerTextBox.Name = "PlayerTextBox"
+    PlayerTextBox.Size = UDim2.new(1, 0, 0, interfaceConfig.buttonHeight)
+    PlayerTextBox.Position = UDim2.new(0, 0, 0, 25)
+    PlayerTextBox.BackgroundColor3 = Color3.fromRGB(30, 30, 60)
+    PlayerTextBox.BorderSizePixel = 0
+    PlayerTextBox.Text = ""
+    PlayerTextBox.PlaceholderText = "Digite o nome do jogador..."
+    PlayerTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    PlayerTextBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 180)
+    PlayerTextBox.TextSize = interfaceConfig.fontSize
+    PlayerTextBox.Font = Enum.Font.Gotham
+    PlayerTextBox.TextXAlignment = Enum.TextXAlignment.Left
+    PlayerTextBox.Parent = PlayerInputFrame
+
+    local TextBoxCorner = Instance.new("UICorner")
+    TextBoxCorner.CornerRadius = UDim.new(0, 8)
+    TextBoxCorner.Parent = PlayerTextBox
+
+    local TextBoxPadding = Instance.new("UIPadding")
+    TextBoxPadding.PaddingLeft = UDim.new(0, 10)
+    TextBoxPadding.Parent = PlayerTextBox
+
+    -- Variável para armazenar o jogador selecionado
+    local SelectedPlayer = ""
+
+    -- Função para verificar se o jogador existe
+    local function CheckPlayerExists(playerName)
+        if playerName == "" then
+            return false, "Digite um nome"
         end
-        return list
+        
+        local player = Players:FindFirstChild(playerName)
+        if player then
+            return true, "Jogador encontrado: " .. playerName
+        else
+            return false, "Jogador não encontrado"
+        end
     end
 
-    local SelectedPlayer = GetPlayersList()[1] or "Nenhum"
-    PlayerDropdown.Text = "👁️ Selecionar Jogador: " .. SelectedPlayer
+    -- Efeitos no TextBox
+    PlayerTextBox.Focused:Connect(function()
+        game:GetService("TweenService"):Create(PlayerTextBox, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(40, 40, 80),
+            BorderSizePixel = 1,
+            BorderColor3 = Color3.fromRGB(0, 100, 255)
+        }):Play()
+    end)
+
+    PlayerTextBox.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            local playerName = string.gsub(PlayerTextBox.Text, "^%s*(.-)%s*$", "%1") -- Remove espaços extras
+            local exists, message = CheckPlayerExists(playerName)
+            
+            if exists then
+                SelectedPlayer = playerName
+                PlayerTextBox.Text = playerName
+                game:GetService("TweenService"):Create(PlayerTextBox, TweenInfo.new(0.3), {
+                    BackgroundColor3 = Color3.fromRGB(30, 60, 30),
+                    BorderColor3 = Color3.fromRGB(0, 255, 0)
+                }):Play()
+                
+                -- Efeito de confirmação
+                task.spawn(function()
+                    task.wait(1)
+                    game:GetService("TweenService"):Create(PlayerTextBox, TweenInfo.new(0.3), {
+                        BackgroundColor3 = Color3.fromRGB(30, 30, 60),
+                        BorderSizePixel = 0
+                    }):Play()
+                end)
+            else
+                game:GetService("TweenService"):Create(PlayerTextBox, TweenInfo.new(0.3), {
+                    BackgroundColor3 = Color3.fromRGB(60, 30, 30),
+                    BorderColor3 = Color3.fromRGB(255, 0, 0)
+                }):Play()
+                
+                -- Reset após 1 segundo
+                task.spawn(function()
+                    task.wait(1)
+                    game:GetService("TweenService"):Create(PlayerTextBox, TweenInfo.new(0.3), {
+                        BackgroundColor3 = Color3.fromRGB(30, 30, 60),
+                        BorderSizePixel = 0
+                    }):Play()
+                end)
+            end
+        else
+            game:GetService("TweenService"):Create(PlayerTextBox, TweenInfo.new(0.2), {
+                BackgroundColor3 = Color3.fromRGB(30, 30, 60),
+                BorderSizePixel = 0
+            }):Play()
+        end
+    end)
 
     -- Lista de comandos com emojis misteriosos
     local commands = {
         {Name="👁️ Kick", Command="kick"},
-        {Name="🔄 Loop Kill", Command="loopkill"},
+        {Name="🔄 Kill", Command="kill"},
         {Name="💀 Kill Plus", Command="killplus"},
         {Name="🌀 Fling", Command="fling"},
         {Name="❄️ Freeze", Command="freeze"},
@@ -456,9 +571,9 @@ task.spawn(function()
     }
 
     -- Criar botões dos comandos com animações azuis
-    local buttonHeight = 45
-    local spacing = 8
-    local totalHeight = 55 -- Começa após o dropdown
+    local buttonHeight = interfaceConfig.buttonHeight
+    local spacing = deviceType == "Mobile" and 6 or 8
+    local totalHeight = interfaceConfig.buttonHeight + 35 + spacing -- Altura do input + espaçamento
 
     for i, cmd in ipairs(commands) do
         local Button = Instance.new("TextButton")
@@ -469,7 +584,7 @@ task.spawn(function()
         Button.BorderSizePixel = 0
         Button.Text = cmd.Name
         Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-        Button.TextSize = 14
+        Button.TextSize = interfaceConfig.fontSize
         Button.Font = Enum.Font.GothamSemibold
         Button.Parent = ScrollingFrame
 
@@ -529,6 +644,29 @@ task.spawn(function()
 
         -- Ação do botão
         Button.MouseButton1Click:Connect(function()
+            -- Verificar se há um jogador selecionado
+            if SelectedPlayer == "" and cmd.Command ~= "verifique" then
+                -- Efeito de erro
+                game:GetService("TweenService"):Create(PlayerTextBox, TweenInfo.new(0.3), {
+                    BackgroundColor3 = Color3.fromRGB(60, 30, 30),
+                    BorderSizePixel = 1,
+                    BorderColor3 = Color3.fromRGB(255, 0, 0)
+                }):Play()
+                
+                local originalText = Button.Text
+                Button.Text = "❌ Digite um nome!"
+                task.wait(1)
+                Button.Text = originalText
+                
+                -- Reset do TextBox
+                task.wait(1)
+                game:GetService("TweenService"):Create(PlayerTextBox, TweenInfo.new(0.3), {
+                    BackgroundColor3 = Color3.fromRGB(30, 30, 60),
+                    BorderSizePixel = 0
+                }):Play()
+                return
+            end
+
             if cmd.Command == "verifique" then
                 SendCommandMessage(cmd.Command)
             else
@@ -551,14 +689,21 @@ task.spawn(function()
     -- Variável para controlar se está minimizado
     local isMinimized = false
 
+    -- Tamanhos para minimizado baseados no dispositivo
+    local minimizedSizes = {
+        Desktop = {width = 200, height = 50},
+        Mobile = {width = 150, height = 40}
+    }
+
     -- Função para minimizar
     local function MinimizeWindow()
         isMinimized = true
+        local minimizedSize = minimizedSizes[deviceType]
         
         -- Animação de minimizar
         game:GetService("TweenService"):Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0, 200, 0, 50),
-            Position = UDim2.new(0.5, -100, 0.1, 0)
+            Size = UDim2.new(0, minimizedSize.width, 0, minimizedSize.height),
+            Position = UDim2.new(0.5, -minimizedSize.width/2, 0.1, 0)
         }):Play()
         
         -- Esconder conteúdo
@@ -570,7 +715,7 @@ task.spawn(function()
         
         -- Mudar texto do botão para maximizar
         MinimizeButton.Text = "+"
-        MinimizeButton.TextSize = 16
+        MinimizeButton.TextSize = deviceType == "Mobile" and 12 or 16
     end
 
     -- Função para maximizar
@@ -582,8 +727,8 @@ task.spawn(function()
         
         -- Animação de maximizar
         game:GetService("TweenService"):Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0, 450, 0, 550),
-            Position = UDim2.new(0.5, -225, 0.5, -275)
+            Size = UDim2.new(0, interfaceConfig.width, 0, interfaceConfig.height),
+            Position = UDim2.new(0.5, -interfaceConfig.width/2, 0.5, -interfaceConfig.height/2)
         }):Play()
         
         -- Mostrar conteúdo com fade
@@ -593,7 +738,7 @@ task.spawn(function()
         
         -- Mudar texto do botão para minimizar
         MinimizeButton.Text = "─"
-        MinimizeButton.TextSize = 18
+        MinimizeButton.TextSize = deviceType == "Mobile" and 14 or 18
     end
 
     -- Botão minimizar/maximizar
@@ -605,7 +750,7 @@ task.spawn(function()
         end
     end)
 
-    -- Sistema para mover a janela
+    -- Sistema para mover a janela (apenas se não for mobile ou se for touch)
     local dragging = false
     local dragInput, dragStart, startPos
 
@@ -615,7 +760,8 @@ task.spawn(function()
     end
 
     TitleBar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        if (input.UserInputType == Enum.UserInputType.MouseButton1) or 
+           (deviceType == "Mobile" and input.UserInputType == Enum.UserInputType.Touch) then
             dragging = true
             dragStart = input.Position
             startPos = MainFrame.Position
@@ -637,7 +783,8 @@ task.spawn(function()
     end)
 
     TitleBar.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
+        if input.UserInputType == Enum.UserInputType.MouseMovement or 
+           (deviceType == "Mobile" and input.UserInputType == Enum.UserInputType.Touch) then
             dragInput = input
         end
     end)
@@ -648,20 +795,22 @@ task.spawn(function()
         end
     end)
 
-    -- Efeitos hover no botão minimizar
-    MinimizeButton.MouseEnter:Connect(function()
-        game:GetService("TweenService"):Create(MinimizeButton, TweenInfo.new(0.2), {
-            BackgroundColor3 = Color3.fromRGB(0, 100, 255),
-            TextColor3 = Color3.fromRGB(255, 255, 255)
-        }):Play()
-    end)
+    -- Efeitos hover no botão minimizar (apenas desktop)
+    if deviceType == "Desktop" then
+        MinimizeButton.MouseEnter:Connect(function()
+            game:GetService("TweenService"):Create(MinimizeButton, TweenInfo.new(0.2), {
+                BackgroundColor3 = Color3.fromRGB(0, 100, 255),
+                TextColor3 = Color3.fromRGB(255, 255, 255)
+            }):Play()
+        end)
 
-    MinimizeButton.MouseLeave:Connect(function()
-        game:GetService("TweenService"):Create(MinimizeButton, TweenInfo.new(0.2), {
-            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-            TextColor3 = Color3.fromRGB(0, 100, 255)
-        }):Play()
-    end)
+        MinimizeButton.MouseLeave:Connect(function()
+            game:GetService("TweenService"):Create(MinimizeButton, TweenInfo.new(0.2), {
+                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                TextColor3 = Color3.fromRGB(0, 100, 255)
+            }):Play()
+        end)
+    end
 
     -- Botão fechar com animação
     CloseButton.MouseButton1Click:Connect(function()
@@ -674,88 +823,34 @@ task.spawn(function()
         ScreenGui:Destroy()
     end)
 
-    -- Efeitos hover no botão fechar
-    CloseButton.MouseEnter:Connect(function()
-        game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.2), {
-            BackgroundColor3 = Color3.fromRGB(0, 100, 255),
-            TextColor3 = Color3.fromRGB(255, 255, 255)
-        }):Play()
-    end)
+    -- Efeitos hover no botão fechar (apenas desktop)
+    if deviceType == "Desktop" then
+        CloseButton.MouseEnter:Connect(function()
+            game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.2), {
+                BackgroundColor3 = Color3.fromRGB(0, 100, 255),
+                TextColor3 = Color3.fromRGB(255, 255, 255)
+            }):Play()
+        end)
 
-    CloseButton.MouseLeave:Connect(function()
-        game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.2), {
-            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-            TextColor3 = Color3.fromRGB(0, 100, 255)
-        }):Play()
-    end)
-
-    -- Atualizar dropdown quando jogadores mudarem
-    local function UpdateDropdown()
-        local players = GetPlayersList()
-        if #players > 0 then
-            SelectedPlayer = players[1]
-        else
-            SelectedPlayer = "Nenhum"
-        end
-        PlayerDropdown.Text = "👁️ Selecionar Jogador: " .. SelectedPlayer
+        CloseButton.MouseLeave:Connect(function()
+            game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.2), {
+                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                TextColor3 = Color3.fromRGB(0, 100, 255)
+            }):Play()
+        end)
     end
-
-    Players.PlayerAdded:Connect(UpdateDropdown)
-    Players.PlayerRemoving:Connect(UpdateDropdown)
-
-    -- Clique no dropdown para selecionar jogador com animação
-    PlayerDropdown.MouseButton1Click:Connect(function()
-        local players = GetPlayersList()
-        if #players > 0 then
-            local currentIndex = 1
-            for i, name in ipairs(players) do
-                if name == SelectedPlayer then
-                    currentIndex = i
-                    break
-                end
-            end
-            
-            local nextIndex = (currentIndex % #players) + 1
-            SelectedPlayer = players[nextIndex]
-            
-            -- Animação de transição
-            game:GetService("TweenService"):Create(PlayerDropdown, TweenInfo.new(0.2), {
-                TextTransparency = 0.5
-            }):Play()
-            
-            task.wait(0.1)
-            PlayerDropdown.Text = "👁️ Selecionar Jogador: " .. SelectedPlayer
-            
-            game:GetService("TweenService"):Create(PlayerDropdown, TweenInfo.new(0.2), {
-                TextTransparency = 0
-            }):Play()
-        end
-    end)
-
-    -- Efeitos hover no dropdown
-    PlayerDropdown.MouseEnter:Connect(function()
-        game:GetService("TweenService"):Create(PlayerDropdown, TweenInfo.new(0.2), {
-            BackgroundColor3 = Color3.fromRGB(50, 50, 100)
-        }):Play()
-    end)
-
-    PlayerDropdown.MouseLeave:Connect(function()
-        game:GetService("TweenService"):Create(PlayerDropdown, TweenInfo.new(0.2), {
-            BackgroundColor3 = Color3.fromRGB(30, 30, 60)
-        }):Play()
-    end)
 
     -- Animação de entrada da interface com efeito azul
     MainFrame.Size = UDim2.new(0, 0, 0, 0)
     MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
     
     game:GetService("TweenService"):Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Size = UDim2.new(0, 450, 0, 550),
-        Position = UDim2.new(0.5, -225, 0.5, -275)
+        Size = UDim2.new(0, interfaceConfig.width, 0, interfaceConfig.height),
+        Position = UDim2.new(0.5, -interfaceConfig.width/2, 0.5, -interfaceConfig.height/2)
     }):Play()
 
     -- Efeito especial quando a interface abre
     CreateBillCipherEffect()
     
-    print("Interface Bill Cipher criada com sucesso!")
+    print("Interface " .. deviceType .. " criada com sucesso!")
 end)
