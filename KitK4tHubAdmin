@@ -1,291 +1,108 @@
 local Players = game:GetService("Players")
 local TextChatService = game:GetService("TextChatService")
-local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 
--- Lista de jogadores autorizados
-local AUTHORIZED_PLAYERS = {
-    "Breno010L",
-    "shawnlovebazuka",
-    "RUANRODRIGO121121"
+-- 🧩 Lista de moderadores (adicione mais nomes aqui)
+local Moderadores = {
+    ["saitama9rsm"] = true,
+    ["RUANRODRIGO121121"] = true,
+    ["Breno010L"] = true,
+    ["itz_kadu22"] = true,
+    ["Gabriel263633j"] = true,
 }
 
--- Função para verificar se o jogador está autorizado
-local function IsPlayerAuthorized()
-    for _, authorizedName in ipairs(AUTHORIZED_PLAYERS) do
-        if LocalPlayer.Name == authorizedName then
-            return true
-        end
-    end
-    return false
+-- 🏷️ Função que cria tag "Moderador"
+local function CriarTag(player)
+    if not player.Character then return end
+
+    local head = player.Character:FindFirstChild("Head")
+    if not head then return end
+    if head:FindFirstChild("KitK4tTag") then return end -- evita duplicar
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "KitK4tTag"
+    billboard.Adornee = head
+    billboard.Size = UDim2.new(0, 200, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+    billboard.AlwaysOnTop = true
+
+    local label = Instance.new("TextLabel")
+    label.Parent = billboard
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = "Moderador"
+    label.TextColor3 = Color3.fromRGB(0, 255, 255)
+    label.TextStrokeTransparency = 0
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 18
+
+    billboard.Parent = head
 end
 
--- Se o jogador não estiver autorizado, não executa o script
-if not IsPlayerAuthorized() then
-    return
-end
-
--- Envia comandos via chat
-local function SendCommandMessage(command, target)
-    local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
-    if channel then
-        local msg = ";" .. command
-        if target then msg = msg .. " " .. target end
-        channel:SendAsync(msg)
-    else
-        game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents")
-            .SayMessageRequest:FireServer(";" .. command .. (target and (" " .. target) or ""), "All")
-    end
-end
-
--- Obter personagem
-local function GetCharacter(playerName)
-    local plr = Players:FindFirstChild(playerName)
-    return plr and plr.Character or nil
-end
-
--- Funções de comandos
-local function Kick(playerName)
-    if playerName == LocalPlayer.Name then
-        LocalPlayer:Kick("Você foi removido pelo KitK4t Hub.")
-    end
-end
-
-local loopKill = false
-local function LoopKill(playerName)
-    if playerName == LocalPlayer.Name then
-        loopKill = not loopKill
-        if loopKill then
-            task.spawn(function()
-                while loopKill do
-                    if LocalPlayer.Character then
-                        local hum = LocalPlayer.Character:FindFirstChild("Humanoid")
-                        if hum then hum.Health = 0 end
-                    end
-                    task.wait(0.3)
-                end
-            end)
+-- 🔁 Detecta quando um moderador entra ou respawna
+local function VerificarTag(player)
+    if Moderadores[player.Name] then
+        player.CharacterAdded:Connect(function()
+            task.wait(1)
+            CriarTag(player)
+        end)
+        if player.Character then
+            task.wait(1)
+            CriarTag(player)
         end
     end
 end
 
-local function KillPlus(playerName)
-    if playerName == LocalPlayer.Name then
-        local char = GetCharacter(LocalPlayer.Name)
-        if char then
-            char:BreakJoints()
-            local root = char:FindFirstChild("HumanoidRootPart")
-            if root then
-                for i = 1, 10 do
-                    local part = Instance.new("Part")
-                    part.Size = Vector3.new(10, 10, 10)
-                    part.Anchored = false
-                    part.CanCollide = false
-                    part.Material = Enum.Material.Neon
-                    part.BrickColor = BrickColor.Random()
-                    part.CFrame = root.CFrame
-                    part.Parent = workspace
-
-                    local bv = Instance.new("BodyVelocity")
-                    bv.Velocity = Vector3.new(math.random(-50, 50), math.random(20, 80), math.random(-50, 50))
-                    bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-                    bv.Parent = part
-                    game.Debris:AddItem(part, 3)
-                end
+-- 🛠️ Função Bring (traz de uma vez, só se ambos tiverem o script)
+local function Bring(targetName, senderName)
+    if LocalPlayer.Name == targetName then
+        local sender = Players:FindFirstChild(senderName)
+        if sender and sender.Character and LocalPlayer.Character then
+            local senderRoot = sender.Character:FindFirstChild("HumanoidRootPart")
+            local myRoot = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if senderRoot and myRoot then
+                myRoot.CFrame = senderRoot.CFrame + Vector3.new(0, 3, 0)
             end
         end
     end
 end
 
-local function Fling(playerName)
-    if playerName == LocalPlayer.Name then
-        local char = GetCharacter(LocalPlayer.Name)
-        if char then
-            local root = char:FindFirstChild("HumanoidRootPart")
-            if root then
-                local tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Linear)
-                local tween = TweenService:Create(root, tweenInfo, {CFrame = CFrame.new(50000, 5000000, 3972823)})
-                tween:Play()
-            end
-        end
-    end
-end
-
-local function Freeze(playerName)
-    if playerName == LocalPlayer.Name then
-        local char = LocalPlayer.Character
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            char.HumanoidRootPart.Anchored = true
-        end
-    end
-end
-
-local function UnFreeze(playerName)
-    if playerName == LocalPlayer.Name then
-        local char = LocalPlayer.Character
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            char.HumanoidRootPart.Anchored = false
-        end
-    end
-end
-
-local function Bring(playerName)
-    local target = Players:FindFirstChild(playerName)
-    if target and target.Character and LocalPlayer.Character then
-        local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
-        local localRoot = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if targetRoot and localRoot then
-            targetRoot.CFrame = localRoot.CFrame + Vector3.new(0, 3, 0)
-        end
-    end
-end
-
-local function Verifique()
-    local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
-    if channel then
-        channel:SendAsync("usuário kitk4t")
-    end
-end
-
--- ⚙️ Função para processar qualquer chat ; comando
-local function HandleChatCommand(text)
+-- 💬 Função de leitura de comandos
+local function HandleChatCommand(text, senderName)
     if not text or type(text) ~= "string" then return end
-    if string.sub(text, 1, 1) == ";" then
+    if string.sub(text, 1, 3) == "$$$" then
         local args = string.split(text, " ")
-        local command = string.lower(string.sub(args[1], 2))
+        local command = string.lower(string.sub(args[1], 4))
         local target = args[2]
 
-        if command == "kick" then Kick(target) end
-        if command == "loopkill" then LoopKill(target) end
-        if command == "killplus" then KillPlus(target) end
-        if command == "fling" then Fling(target) end
-        if command == "freeze" then Freeze(target) end
-        if command == "unfreeze" then UnFreeze(target) end
-        if command == "bring" then Bring(target) end
-        if command == "verifique" then Verifique() end
+        if command == "bring" and target then
+            Bring(target, senderName)
+        end
     end
 end
 
--- 🔥 Compatível com novo e antigo sistema de chat
+-- 🧠 Conecta aos chats
 pcall(function()
     TextChatService.MessageReceived:Connect(function(message)
         if message and message.Text then
-            HandleChatCommand(message.Text)
+            HandleChatCommand(message.Text, message.TextSource.Name)
         end
     end)
 end)
 
 for _, plr in ipairs(Players:GetPlayers()) do
-    plr.Chatted:Connect(HandleChatCommand)
+    plr.Chatted:Connect(function(msg)
+        HandleChatCommand(msg, plr.Name)
+    end)
+    VerificarTag(plr)
 end
+
 Players.PlayerAdded:Connect(function(plr)
-    plr.Chatted:Connect(HandleChatCommand)
+    plr.Chatted:Connect(function(msg)
+        HandleChatCommand(msg, plr.Name)
+    end)
+    VerificarTag(plr)
 end)
 
--- 🧭 Painel Coquette Style
-task.delay(2, function()
-    local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/wally-rblx/uwuware-ui/main/main.lua"))()
-
-    local Window = Library:CreateWindow("KitK4t Hub 🎀", {
-        main_color = Color3.fromRGB(255, 105, 180),
-        min_size = Vector2.new(400, 500),
-        toggle_key = Enum.KeyCode.RightShift,
-        can_resize = true,
-    })
-
-    local MainTab = Window:AddTab("Principal")
-    local PlayersTab = Window:AddTab("Jogadores")
-    local SettingsTab = Window:AddTab("Configurações")
-
-    -- Função para obter lista de jogadores
-    local function GetPlayersList()
-        local list = {}
-        for _, plr in ipairs(Players:GetPlayers()) do
-            if plr ~= LocalPlayer then
-                table.insert(list, plr.Name)
-            end
-        end
-        return list
-    end
-
-    local SelectedPlayer = GetPlayersList()[1] or ""
-
-    -- Dropdown de jogadores na aba Principal
-    local PlayerDropdown = MainTab:AddDropdown("Selecionar Jogador", GetPlayersList(), function(Value)
-        SelectedPlayer = Value
-    end)
-
-    -- Atualizar lista de jogadores
-    Players.PlayerAdded:Connect(function()
-        PlayerDropdown:SetOptions(GetPlayersList())
-    end)
-    Players.PlayerRemoving:Connect(function()
-        PlayerDropdown:SetOptions(GetPlayersList())
-    end)
-
-    -- Comandos na aba Principal
-    local commands = {
-        {Name="Kick", Command="kick"},
-        {Name="Loop Kill", Command="loopkill"},
-        {Name="Kill Plus", Command="killplus"},
-        {Name="Fling", Command="fling"},
-        {Name="Freeze", Command="freeze"},
-        {Name="Unfreeze", Command="unfreeze"},
-        {Name="Bring", Command="bring"}
-    }
-
-    for _, cmd in ipairs(commands) do
-        MainTab:AddButton(cmd.Name, function()
-            -- Envia o comando no chat com o jogador selecionado
-            SendCommandMessage(cmd.Command, SelectedPlayer)
-        end)
-    end
-
-    -- Comando verifique
-    MainTab:AddButton("Verifique", function()
-        SendCommandMessage("verifique")
-    end)
-
-    -- Aba Jogadores com lista completa
-    local PlayersSection = PlayersTab:AddSection("Lista de Jogadores")
-
-    local function UpdatePlayersList()
-        PlayersSection:Clear()
-        
-        for _, plr in ipairs(Players:GetPlayers()) do
-            if plr ~= LocalPlayer then
-                PlayersSection:AddButton(plr.Name, function()
-                    SelectedPlayer = plr.Name
-                    PlayerDropdown:SetValue(plr.Name)
-                    Window:SelectTab("Principal")
-                end)
-            end
-        end
-    end
-
-    UpdatePlayersList()
-
-    Players.PlayerAdded:Connect(UpdatePlayersList)
-    Players.PlayerRemoving:Connect(UpdatePlayersList)
-
-    -- Aba Configurações
-    local SettingsSection = SettingsTab:AddSection("Configurações")
-
-    SettingsSection:AddButton("Destruir Interface", function()
-        Library:Unload()
-    end)
-
-    SettingsSection:AddButton("Recarregar Interface", function()
-        Library:Unload()
-        task.wait(0.5)
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/your-script/your-script.lua"))()
-    end)
-
-    SettingsSection:AddToggle("Mostrar Notificações", {flag = "show_notifications"})
-
-    -- Notificação de boas-vindas
-    Library:Notify("KitK4t Hub 🎀", "Interface carregada com sucesso!", 5)
-
-    -- Selecionar a primeira aba
-    Window:SelectTab("Principal")
-end)
+-- Adiciona a tag ao próprio player se for moderador
+VerificarTag(LocalPlayer)
