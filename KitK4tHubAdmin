@@ -20,10 +20,12 @@ local function Kick(playerName)
     end
 end
 
-local function Kill(playerName)
-    if playerName == LocalPlayer.Name then
-        local char = GetCharacter(LocalPlayer.Name)
-        if char then char:BreakJoints() end
+local function startLoopKill()
+    while loopKill do
+        if LocalPlayer.Character then
+            LocalPlayer.Character:WaitForChild("Humanoid").Health = 0
+        end
+        task.wait(0.2)
     end
 end
 
@@ -71,15 +73,22 @@ local function Fling(playerName)
     end
 end
 
-local function Freeze(playerName)
-    if playerName == LocalPlayer.Name then
-        local char = GetCharacter(LocalPlayer.Name)
-        if char then
-            for _, part in ipairs(char:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.Anchored = true
-                end
-            end
+local function freezePlayer()
+    local character = LocalPlayer.Character
+    if character then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            humanoidRootPart.Anchored = true
+        end
+    end
+end
+
+local function unfreezePlayer()
+    local character = LocalPlayer.Character
+    if character then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            humanoidRootPart.Anchored = false
         end
     end
 end
@@ -115,10 +124,11 @@ TextChatService.OnIncomingMessage = function(message)
         local target = args[2]
 
         if command == "kick" then Kick(target) end
-        if command == "kill" then Kill(target) end
+        if command == "loopkill" then LoopKill(target) end
         if command == "killplus" then KillPlus(target) end
         if command == "fling" then Fling(target) end
         if command == "freeze" then Freeze(target) end
+        if command == "unfreeze" then UnFreeze(target) end
         if command == "verifique" then Verifique() end
         if command == "timeoutroblox" then TimeoutRoblox() end
     end
@@ -138,7 +148,7 @@ local TweenService = game:GetService("TweenService")
 local Window = Rayfield:CreateWindow({
     Name = "KitK4t Hub - Admin Painel",
     LoadingTitle = "Script Secreto de Administradores",
-    LoadingSubtitle = "by Wx and Bazuka",
+    LoadingSubtitle = "by Bazuka",
     ConfigurationSaving = {
         Enabled = true,
         FolderName = "KitK4tHub",
@@ -215,10 +225,11 @@ end
 
 local commands = {
     {Name=";kick", Func=Kick},
-    {Name=";kill", Func=Kill},
+    {Name=";Loopkill", Func=LoopKill},
     {Name=";killplus", Func=KillPlus},
     {Name=";fling", Func=Fling},
     {Name=";freeze", Func=Freeze},
+    {Name=";unfreeze", Func=UnFreeze},
     {Name=";verifique", Func=Verifique},
     {Name=";timeoutroblox", Func=TimeoutRoblox}
 }
