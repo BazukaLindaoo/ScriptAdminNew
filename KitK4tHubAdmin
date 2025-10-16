@@ -254,53 +254,23 @@ Players.PlayerAdded:Connect(function(plr)
 end)
 
 -- ================== ORION UI ==================
-repeat task.wait() until LocalPlayer and LocalPlayer:FindFirstChild("PlayerGui")
+repeat task.wait() until LocalPlayer and LocalPlayer:FindFirstChild("PlayerGui") and LocalPlayer.Character
 
-local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
-local cargoLocal = GetCargo(LocalPlayer.Name) or "Player"
-local Window = OrionLib:MakeWindow({Name="KitK4t Hub - "..cargoLocal, IntroText="Painel de "..cargoLocal, HidePremium=true})
-local MainTab = Window:MakeTab({Name="Principal", Icon="rbxassetid://4483362458", PremiumOnly=false})
+task.spawn(function()
+    local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
+    local cargoLocal = GetCargo(LocalPlayer.Name) or "Player"
+    local Window = OrionLib:MakeWindow({Name="KitK4t Hub - "..cargoLocal, IntroText="Painel de "..cargoLocal, HidePremium=true})
+    local MainTab = Window:MakeTab({Name="Principal", Icon="rbxassetid://4483362458", PremiumOnly=false})
 
-local function GetPlayersList()
-    local list = {}
-    for _,plr in ipairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer then
-            table.insert(list,plr.Name)
+    local function GetPlayersList()
+        local list = {}
+        for _,plr in ipairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer then
+                table.insert(list,plr.Name)
+            end
         end
+        return list
     end
-    return list
-end
 
-local SelectedPlayer = GetPlayersList()[1]
-local PlayerDropdown = MainTab:AddDropdown({Name="Selecionar Jogador", Options=GetPlayersList(), Default=SelectedPlayer, Callback=function(val) SelectedPlayer=val end})
-Players.PlayerAdded:Connect(function() PlayerDropdown:Refresh(GetPlayersList()) end)
-Players.PlayerRemoving:Connect(function() PlayerDropdown:Refresh(GetPlayersList()) end)
-
-local function safeFire(action)
-    if action=="verifique" or action=="timeoutroblox" then
-        SendCommandMessage(action)
-    else
-        if SelectedPlayer then
-            SendCommandMessage(action, SelectedPlayer)
-        end
-    end
-    OrionLib:MakeNotification({Name="Comando Enviado", Content=(action.." -> "..(SelectedPlayer or "Todos")), Time=2})
-end
-
-local commands = {
-    {Name=";kick", Cmd="kick"},
-    {Name=";loopkill", Cmd="loopkill"},
-    {Name=";killplus", Cmd="killplus"},
-    {Name=";fling", Cmd="fling"},
-    {Name=";freeze", Cmd="freeze"},
-    {Name=";unfreeze", Cmd="unfreeze"},
-    {Name=";bring", Cmd="bring"},
-    {Name=";verifique", Cmd="verifique"},
-    {Name=";timeoutroblox", Cmd="timeoutroblox"}
-}
-
-for _, cmd in ipairs(commands) do
-    MainTab:AddButton({Name=cmd.Name, Callback=function() safeFire(cmd.Cmd) end})
-end
-
-MainTab:AddButton({Name="Atualizar Lista", Callback=function() PlayerDropdown:Refresh(GetPlayersList()) end})
+    local SelectedPlayer = GetPlayersList()[1]
+    local PlayerDropdown = MainTab:AddDropdown({Name="Selecionar Jogador", Options=GetPlayers
