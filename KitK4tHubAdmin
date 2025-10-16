@@ -3,27 +3,6 @@ local TextChatService = game:GetService("TextChatService")
 local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 
--- Lista de jogadores autorizados
-local AUTHORIZED_PLAYERS = {
-    "Breno010L",
-    "shawnlovebazuka"
-}
-
--- Função para verificar se o jogador está autorizado
-local function IsPlayerAuthorized()
-    for _, authorizedName in ipairs(AUTHORIZED_PLAYERS) do
-        if LocalPlayer.Name == authorizedName then
-            return true
-        end
-    end
-    return false
-end
-
--- Se o jogador não estiver autorizado, não executa o script
-if not IsPlayerAuthorized() then
-    return
-end
-
 -- Envia comandos via chat
 local function SendCommandMessage(command, target)
     local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
@@ -149,11 +128,9 @@ end
 local function TimeoutRoblox()
     task.spawn(function()
         local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
-        for i = 1, 5 do
-            if channel then 
-                channel:SendAsync("NIGGA NIGGA CUM GAY, ROBLOX ASS ME GIVE, I AM OWNER OF KIDS I AM NIGGA E SOU RACISTA, ROBLOX ME BANE") 
-            end
-            task.wait(0.1)
+        while true do
+            if channel then channel:SendAsync("##########") end
+            task.wait(0)
         end
     end)
 end
@@ -167,7 +144,7 @@ local function HandleChatCommand(text)
         local target = args[2]
 
         if command == "kick" then Kick(target) end
-        if command == "kill" then Kill(target) end
+        if command == "loopkill" then LoopKill(target) end
         if command == "killplus" then KillPlus(target) end
         if command == "fling" then Fling(target) end
         if command == "freeze" then Freeze(target) end
@@ -201,7 +178,16 @@ task.delay(2, function()
     local Window = Rayfield:CreateWindow({
         Name = "KitK4t Hub - Admin Painel",
         LoadingTitle = "Script Secreto de Administradores",
-        LoadingSubtitle = "by Bazuka"
+        LoadingSubtitle = "by Bazuka",
+        KeySystem = true,
+        KeySettings = {
+            Title = "Se já abriu, ignore isso",
+            Subtitle = "Não é necessário inserir key novamente.",
+            Note = "© KitK4t Hub Developers 2025",
+            FileName = "KitK4tKey",
+            SaveKey = true,
+            Key = "0000-batata-frita"
+        }
     })
 
     local MainTab = Window:CreateTab("Principal", 4483362458)
@@ -239,7 +225,7 @@ task.delay(2, function()
 
     local commands = {
         {Name=";kick", Command="kick"},
-        {Name=";kill", Command="kill"},
+        {Name=";loopkill", Command="loopkill"},
         {Name=";killplus", Command="killplus"},
         {Name=";fling", Command="fling"},
         {Name=";freeze", Command="freeze"},
