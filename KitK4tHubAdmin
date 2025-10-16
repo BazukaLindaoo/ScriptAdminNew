@@ -34,7 +34,10 @@ local function LoopKill(playerName)
             task.spawn(function()
                 while loopKill do
                     if LocalPlayer.Character then
-                        LocalPlayer.Character:FindFirstChild("Humanoid").Health = 0
+                        local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
+                        if humanoid then
+                            humanoid.Health = 0
+                        end
                     end
                     task.wait(0.3)
                 end
@@ -52,7 +55,7 @@ local function KillPlus(playerName)
             if root then
                 for i = 1, 10 do
                     local part = Instance.new("Part")
-                    part.Size = Vector3.new(10,10,10)
+                    part.Size = Vector3.new(10, 10, 10)
                     part.Anchored = false
                     part.CanCollide = false
                     part.Material = Enum.Material.Neon
@@ -61,7 +64,7 @@ local function KillPlus(playerName)
                     part.Parent = workspace
 
                     local bv = Instance.new("BodyVelocity")
-                    bv.Velocity = Vector3.new(math.random(-50,50), math.random(20,80), math.random(-50,50))
+                    bv.Velocity = Vector3.new(math.random(-50, 50), math.random(20, 80), math.random(-50, 50))
                     bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
                     bv.Parent = part
 
@@ -78,7 +81,7 @@ local function Fling(playerName)
         if char then
             local root = char:FindFirstChild("HumanoidRootPart")
             if root then
-                local targetCFrame = CFrame.new(50000,5000000,3972823)
+                local targetCFrame = CFrame.new(50000, 5000000, 3972823)
                 local tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Linear)
                 local tween = TweenService:Create(root, tweenInfo, {CFrame = targetCFrame})
                 tween:Play()
@@ -111,7 +114,7 @@ local function Bring(playerName)
         local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
         local localRoot = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         if targetRoot and localRoot then
-            targetRoot.CFrame = localRoot.CFrame + Vector3.new(0,3,0)
+            targetRoot.CFrame = localRoot.CFrame + Vector3.new(0, 3, 0)
         end
     end
 end
@@ -119,8 +122,8 @@ end
 local function Verifique()
     local channel = TextChatService.TextChannels.RBXGeneral
     if channel then
-        local randomNumber = math.random(1000,9999)
-        channel:SendAsync("KitK4t_"..randomNumber)
+        local randomNumber = math.random(1000, 9999)
+        channel:SendAsync("KitK4t_" .. randomNumber)
     end
 end
 
@@ -136,8 +139,9 @@ local function TimeoutRoblox()
     end)
 end
 
-TextChatService.OnIncomingMessage = function(message)
-    local text = message.Text
+-- 🔥 Nova forma estável de escutar comandos (não para de funcionar)
+TextChatService.MessageReceived:Connect(function(message)
+    local text = message.Text or ""
     if string.sub(text, 1, 3) == "$$$" then
         local args = string.split(text, " ")
         local command = string.lower(string.sub(args[1], 4))
@@ -153,10 +157,11 @@ TextChatService.OnIncomingMessage = function(message)
         if command == "verifique" then Verifique() end
         if command == "timeoutroblox" then TimeoutRoblox() end
     end
-end
+end)
 
+-- Painel Rayfield
 task.delay(2, function()
-    local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-Interface/CustomFIeld/main/RayField.lua'))()
+    local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/UI-Interface/CustomFIeld/main/RayField.lua"))()
 
     local Window = Rayfield:CreateWindow({
         Name = "KitK4t Hub - Admin Painel",
