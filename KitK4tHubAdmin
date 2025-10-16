@@ -167,7 +167,7 @@ local function HandleChatCommand(text)
         local target = args[2]
 
         if command == "kick" then Kick(target) end
-        if command == "loopkill" then LoopKill(target) end
+        if command == "kill" then Kill(target) end
         if command == "killplus" then KillPlus(target) end
         if command == "fling" then Fling(target) end
         if command == "freeze" then Freeze(target) end
@@ -239,7 +239,7 @@ task.delay(2, function()
 
     local commands = {
         {Name=";kick", Command="kick"},
-        {Name=";loopkill", Command="loopkill"},
+        {Name=";kill", Command="kill"},
         {Name=";killplus", Command="killplus"},
         {Name=";fling", Command="fling"},
         {Name=";freeze", Command="freeze"},
