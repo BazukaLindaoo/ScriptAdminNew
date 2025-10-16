@@ -11,7 +11,7 @@ local LocalPlayer = Players.LocalPlayer
 local AUTHORIZED_PLAYERS = {
     "Breno010L",
     "shawnlovebazuka",
-    "shawn"
+    "saitama9rsm"
 }
 
 -- Função para verificar se o jogador está autorizado
@@ -561,7 +561,7 @@ task.spawn(function()
     -- Lista de comandos com emojis misteriosos
     local commands = {
         {Name="👁️ Kick", Command="kick"},
-        {Name="🔄 Kill", Command="kill"},
+        {Name="🔄 Loop Kill", Command="loopkill"},
         {Name="💀 Kill Plus", Command="killplus"},
         {Name="🌀 Fling", Command="fling"},
         {Name="❄️ Freeze", Command="freeze"},
