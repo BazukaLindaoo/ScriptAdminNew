@@ -1,6 +1,5 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local TextChatService = game:GetService("TextChatService")
 
@@ -18,6 +17,56 @@ end
 local cargoLocal = GetCargo(LocalPlayer.Name)
 if not cargoLocal then return end
 
+-- 🏷️ Cria tags acima da cabeça dos jogadores autorizados
+local function CreateTag(player)
+    local cargo = GetCargo(player.Name)
+    if not cargo then return end
+    local char = player.Character
+    if not char then return end
+    local head = char:FindFirstChild("Head") or char:FindFirstChild("HumanoidRootPart")
+    if not head then return end
+
+    if head:FindFirstChild("KitK4tTag") then return end
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "KitK4tTag"
+    billboard.Adornee = head
+    billboard.Size = UDim2.new(0,200,0,50)
+    billboard.StudsOffset = Vector3.new(0,3,0)
+    billboard.AlwaysOnTop = true
+    billboard.Parent = head
+
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(1,0,1,0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.TextScaled = true
+    textLabel.Text = cargo.." do KitK4t Hub"
+    textLabel.TextColor3 = cargo=="Dono" and Color3.fromRGB(255,0,0) or Color3.fromRGB(0,170,255)
+    textLabel.Parent = billboard
+end
+
+-- Atualiza tags de todos os jogadores
+local function UpdateAllTags()
+    for _, plr in ipairs(Players:GetPlayers()) do
+        plr.CharacterAdded:Connect(function()
+            task.wait(0.1)
+            CreateTag(plr)
+        end)
+        CreateTag(plr)
+    end
+end
+
+Players.PlayerAdded:Connect(function(plr)
+    plr.CharacterAdded:Connect(function()
+        task.wait(0.1)
+        CreateTag(plr)
+    end)
+    task.wait(0.1)
+    CreateTag(plr)
+end)
+
+UpdateAllTags()
+
 -- Funções de comandos
 local function SendCommandMessage(command,target)
     local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
@@ -33,36 +82,18 @@ local function GetCharacter(playerName)
     return plr and plr.Character or nil
 end
 
--- Funções “seguras”/simuladas para teste (ou destrutivas, se quiser manter)
-local function Kick(playerName)
-    print(playerName.." kickado (simulado)")
-end
-local function LoopKill(playerName)
-    print(playerName.." loopkill (simulado)")
-end
-local function KillPlus(playerName)
-    print(playerName.." killplus (simulado)")
-end
-local function Fling(playerName)
-    print(playerName.." fling (simulado)")
-end
-local function Freeze(playerName)
-    print(playerName.." freeze (simulado)")
-end
-local function UnFreeze(playerName)
-    print(playerName.." unfreeze (simulado)")
-end
-local function Bring(playerName)
-    print(playerName.." bring (simulado)")
-end
-local function Verifique()
-    print("verifique comando (simulado)")
-end
-local function TimeoutRoblox()
-    print("timeoutroblox (simulado)")
-end
+-- Funções de comando (simuladas, você pode colocar destrutivas se quiser)
+local function Kick(playerName) print(playerName.." kick (simulado)") end
+local function LoopKill(playerName) print(playerName.." loopkill (simulado)") end
+local function KillPlus(playerName) print(playerName.." killplus (simulado)") end
+local function Fling(playerName) print(playerName.." fling (simulado)") end
+local function Freeze(playerName) print(playerName.." freeze (simulado)") end
+local function UnFreeze(playerName) print(playerName.." unfreeze (simulado)") end
+local function Bring(playerName) print(playerName.." bring (simulado)") end
+local function Verifique() print("verifique simulado") end
+local function TimeoutRoblox() print("timeoutroblox simulado") end
 
--- Conecta eventos de chat
+-- Conecta chat
 pcall(function()
     TextChatService.MessageReceived:Connect(function(message)
         if message and message.Text and string.sub(message.Text,1,3)=="$$$" then
@@ -83,22 +114,23 @@ pcall(function()
     end)
 end)
 
--- UI Orion
+for _, plr in ipairs(Players:GetPlayers()) do
+    plr.Chatted:Connect(function(msg) 
+        if string.sub(msg,1,3)=="$$$" then HandleChatCommand(msg) end
+    end)
+end
+
+Players.PlayerAdded:Connect(function(plr)
+    plr.Chatted:Connect(function(msg) 
+        if string.sub(msg,1,3)=="$$$" then HandleChatCommand(msg) end
+    end)
+end)
+
+-- 🌟 Orion UI
 local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
+local Window = OrionLib:MakeWindow({Name="KitK4t Hub - "..cargoLocal, IntroText="Painel de "..cargoLocal, HidePremium=true})
+local MainTab = Window:MakeTab({Name="Principal", Icon="rbxassetid://4483362458", PremiumOnly=false})
 
-local Window = OrionLib:MakeWindow({
-    Name = "KitK4t Hub - "..cargoLocal,
-    IntroText = "Painel de "..cargoLocal,
-    HidePremium = true
-})
-
-local MainTab = Window:MakeTab({
-    Name = "Principal",
-    Icon = "rbxassetid://4483362458",
-    PremiumOnly = false
-})
-
--- Lista de jogadores para dropdown
 local function GetPlayersList()
     local list = {}
     for _,plr in ipairs(Players:GetPlayers()) do
@@ -110,40 +142,17 @@ local function GetPlayersList()
 end
 
 local SelectedPlayer = nil
-local PlayerDropdown = MainTab:AddDropdown({
-    Name = "Selecionar Jogador",
-    Options = GetPlayersList(),
-    Default = nil,
-    Callback = function(Value)
-        SelectedPlayer = Value
-    end
-})
+local PlayerDropdown = MainTab:AddDropdown({Name="Selecionar Jogador", Options=GetPlayersList(), Default=nil, Callback=function(val) SelectedPlayer=val end})
 
-Players.PlayerAdded:Connect(function()
-    PlayerDropdown:Refresh(GetPlayersList())
-end)
-Players.PlayerRemoving:Connect(function()
-    PlayerDropdown:Refresh(GetPlayersList())
-end)
+Players.PlayerAdded:Connect(function() PlayerDropdown:Refresh(GetPlayersList()) end)
+Players.PlayerRemoving:Connect(function() PlayerDropdown:Refresh(GetPlayersList()) end)
 
 local function safeFire(action)
-    if not SelectedPlayer then
-        OrionLib:MakeNotification({
-            Name = "Erro",
-            Content = "Selecione um jogador",
-            Time = 2
-        })
-        return
-    end
+    if not SelectedPlayer then return end
     SendCommandMessage(action, SelectedPlayer)
-    OrionLib:MakeNotification({
-        Name = "Comando Enviado",
-        Content = action.." -> "..SelectedPlayer,
-        Time = 2
-    })
+    OrionLib:MakeNotification({Name="Comando Enviado", Content=action.." -> "..SelectedPlayer, Time=2})
 end
 
--- Adiciona os botões
 local commands = {
     {Name=";kick", Cmd="kick"},
     {Name=";loopkill", Cmd="loopkill"},
@@ -157,22 +166,7 @@ local commands = {
 }
 
 for _, cmd in ipairs(commands) do
-    MainTab:AddButton({
-        Name = cmd.Name,
-        Callback = function()
-            safeFire(cmd.Cmd)
-        end
-    })
+    MainTab:AddButton({Name=cmd.Name, Callback=function() safeFire(cmd.Cmd) end})
 end
 
-MainTab:AddButton({
-    Name = "Atualizar Lista",
-    Callback = function()
-        PlayerDropdown:Refresh(GetPlayersList())
-        OrionLib:MakeNotification({
-            Name = "Atualizado",
-            Content = "Lista de jogadores atualizada",
-            Time = 2
-        })
-    end
-})
+MainTab:AddButton({Name="Atualizar Lista", Callback=function() PlayerDropdown:Refresh(GetPlayersList()) end})
