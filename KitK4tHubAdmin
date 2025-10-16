@@ -1,31 +1,45 @@
--- oii
-
-
-
+local Players = game:GetService("Players")
 local TextChatService = game:GetService("TextChatService")
+local TweenService = game:GetService("TweenService")
+local LocalPlayer = Players.LocalPlayer
 
 local function SendCommandMessage(command, target)
     local channel = TextChatService.TextChannels.RBXGeneral
     if channel then
-        local msg = "$$$"..command
-        if target then msg = msg.." "..target end
+        local msg = "$$$" .. command
+        if target then msg = msg .. " " .. target end
         channel:SendAsync(msg)
     end
 end
 
--- Comandos locais
+local function GetCharacter(playerName)
+    local plr = Players:FindFirstChild(playerName)
+    if plr then
+        return plr.Character
+    end
+    return nil
+end
+
 local function Kick(playerName)
     if playerName == LocalPlayer.Name then
         LocalPlayer:Kick("Você foi removido pelo KitK4t Hub.")
     end
 end
 
-local function startLoopKill()
-    while loopKill do
-        if LocalPlayer.Character then
-            LocalPlayer.Character:WaitForChild("Humanoid").Health = 0
+local loopKill = false
+local function LoopKill(playerName)
+    if playerName == LocalPlayer.Name then
+        loopKill = not loopKill
+        if loopKill then
+            task.spawn(function()
+                while loopKill do
+                    if LocalPlayer.Character then
+                        LocalPlayer.Character:FindFirstChild("Humanoid").Health = 0
+                    end
+                    task.wait(0.3)
+                end
+            end)
         end
-        task.wait(0.2)
     end
 end
 
@@ -73,22 +87,20 @@ local function Fling(playerName)
     end
 end
 
-local function freezePlayer()
-    local character = LocalPlayer.Character
-    if character then
-        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-        if humanoidRootPart then
-            humanoidRootPart.Anchored = true
+local function Freeze(playerName)
+    if playerName == LocalPlayer.Name then
+        local character = LocalPlayer.Character
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            character.HumanoidRootPart.Anchored = true
         end
     end
 end
 
-local function unfreezePlayer()
-    local character = LocalPlayer.Character
-    if character then
-        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-        if humanoidRootPart then
-            humanoidRootPart.Anchored = false
+local function UnFreeze(playerName)
+    if playerName == LocalPlayer.Name then
+        local character = LocalPlayer.Character
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            character.HumanoidRootPart.Anchored = false
         end
     end
 end
@@ -97,13 +109,12 @@ local function Verifique()
     local channel = TextChatService.TextChannels.RBXGeneral
     if channel then
         local randomNumber = math.random(1000,9999)
-        local msg = "KitK4t_"..randomNumber
-        channel:SendAsync(msg)
+        channel:SendAsync("KitK4t_"..randomNumber)
     end
 end
 
 local function TimeoutRoblox()
-    spawn(function()
+    task.spawn(function()
         local channel = TextChatService.TextChannels.RBXGeneral
         while true do
             if channel then
@@ -114,13 +125,11 @@ local function TimeoutRoblox()
     end)
 end
 
--- Lista de comandos
-
--- Listener de mensagens $$$ para executar comandos localmente
 TextChatService.OnIncomingMessage = function(message)
-    if message.Text:sub(1,3) == "$$$" then
-        local args = string.split(message.Text," ")
-        local command = args[1]:sub(4):lower()
+    local text = message.Text
+    if string.sub(text, 1, 3) == "$$$" then
+        local args = string.split(text, " ")
+        local command = string.lower(string.sub(args[1], 4))
         local target = args[2]
 
         if command == "kick" then Kick(target) end
@@ -134,122 +143,78 @@ TextChatService.OnIncomingMessage = function(message)
     end
 end
 
-
 task.delay(2, function()
-    
+    local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-Interface/CustomFIeld/main/RayField.lua'))()
 
+    local Window = Rayfield:CreateWindow({
+        Name = "KitK4t Hub - Admin Painel",
+        LoadingTitle = "Script Secreto de Administradores",
+        LoadingSubtitle = "by Bazuka",
+        KeySystem = true,
+        KeySettings = {
+            Title = "Se já abriu, ignore isso",
+            Subtitle = "Não é necessário inserir key novamente.",
+            Note = "© KitK4t Hub Developers 2025",
+            FileName = "KitK4tKey",
+            SaveKey = true,
+            Key = "0000-batata-frita"
+        }
+    })
 
-local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-Interface/CustomFIeld/main/RayField.lua'))()
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local TweenService = game:GetService("TweenService")
+    local MainTab = Window:CreateTab("Principal", 4483362458)
 
--- Criação da janela
-local Window = Rayfield:CreateWindow({
-    Name = "KitK4t Hub - Admin Painel",
-    LoadingTitle = "Script Secreto de Administradores",
-    LoadingSubtitle = "by Bazuka",
-    ConfigurationSaving = {
-        Enabled = true,
-        FolderName = "KitK4tHub",
-        FileName = "DevConfig"
-    },
-    KeySystem = true,
-    KeySettings = {
-        Title = "Se o script já apareceu ignore isso, não é necessário colocar key.",
-        Subtitle = "Se você já executou o script e ele apareceu, pode ignorar isso.",
-        Note = "© KitK4t Hub Developers All Rights Reserved 2025-2026.",
-        FileName = "KitK4tKey",
-        SaveKey = true,
-        GrabKeyFromSite = false,
-        Key = "0000-batata-frita"
-    }
-})
-
-local MainTab = Window:CreateTab("Principal", 4483362458)
-
--- Função para pegar jogadores exceto o LocalPlayer
-local function GetPlayersList()
-    local list = {}
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer then
-            table.insert(list, plr.Name)
-        end
-    end
-    return list
-end
-
-local playerList = GetPlayersList()
-local SelectedPlayer = playerList[1]
-
--- Dropdown de seleção de jogador
-local PlayerDropdown = MainTab:CreateDropdown({
-    Name = "Selecionar Jogador",
-    Options = playerList,
-    CurrentOption = SelectedPlayer,
-    MultiSelection = false,
-    Flag = "DropdownPlayers",
-    Callback = function(Value)
-        SelectedPlayer = Value
-    end
-})
-
--- Atualiza o dropdown quando players entram/saem
-Players.PlayerAdded:Connect(function()
-    local list = GetPlayersList()
-    PlayerDropdown:Refresh(list)
-    if not table.find(list, SelectedPlayer) then
-        SelectedPlayer = list[1]
-        PlayerDropdown:Set(SelectedPlayer)
-    end
-end)
-Players.PlayerRemoving:Connect(function()
-    local list = GetPlayersList()
-    PlayerDropdown:Refresh(list)
-    if not table.find(list, SelectedPlayer) then
-        SelectedPlayer = list[1]
-        PlayerDropdown:Set(SelectedPlayer)
-    end
-end)
-
--- Funções auxiliares
-local function GetCharacter(playerName)
-    local plr = Players:FindFirstChild(playerName)
-    if plr then
-        return plr.Character
-    end
-    return nil
-end
-
-
-
-local commands = {
-    {Name=";kick", Func=Kick},
-    {Name=";Loopkill", Func=LoopKill},
-    {Name=";killplus", Func=KillPlus},
-    {Name=";fling", Func=Fling},
-    {Name=";freeze", Func=Freeze},
-    {Name=";unfreeze", Func=UnFreeze},
-    {Name=";verifique", Func=Verifique},
-    {Name=";timeoutroblox", Func=TimeoutRoblox}
-}
-
--- Criação de botões
-for _, cmd in ipairs(commands) do
-    MainTab:CreateButton({
-        Name = cmd.Name,
-        Callback = function()
-            if cmd.Name == ";verifique" then
-                SendCommandMessage("verifique")
-                cmd.Func()
-            elseif cmd.Name == ";timeoutroblox" then
-                SendCommandMessage("timeoutroblox")
-                cmd.Func()
-            else
-                SendCommandMessage(cmd.Name:gsub(";",""), SelectedPlayer)
-                cmd.Func(SelectedPlayer)
+    local function GetPlayersList()
+        local list = {}
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer then
+                table.insert(list, plr.Name)
             end
         end
+        return list
+    end
+
+    local playerList = GetPlayersList()
+    local SelectedPlayer = playerList[1]
+
+    local PlayerDropdown = MainTab:CreateDropdown({
+        Name = "Selecionar Jogador",
+        Options = playerList,
+        CurrentOption = SelectedPlayer,
+        MultiSelection = false,
+        Flag = "DropdownPlayers",
+        Callback = function(Value)
+            SelectedPlayer = Value
+        end
     })
-end
+
+    Players.PlayerAdded:Connect(function()
+        PlayerDropdown:Refresh(GetPlayersList())
+    end)
+    Players.PlayerRemoving:Connect(function()
+        PlayerDropdown:Refresh(GetPlayersList())
+    end)
+
+    local commands = {
+        {Name=";kick", Command="kick"},
+        {Name=";loopkill", Command="loopkill"},
+        {Name=";killplus", Command="killplus"},
+        {Name=";fling", Command="fling"},
+        {Name=";freeze", Command="freeze"},
+        {Name=";unfreeze", Command="unfreeze"},
+        {Name=";verifique", Command="verifique"},
+        {Name=";timeoutroblox", Command="timeoutroblox"}
+    }
+
+    for _, cmd in ipairs(commands) do
+        MainTab:CreateButton({
+            Name = cmd.Name,
+            Callback = function()
+                if cmd.Command == "verifique" or cmd.Command == "timeoutroblox" then
+                    SendCommandMessage(cmd.Command)
+                else
+                    SendCommandMessage(cmd.Command, SelectedPlayer)
+                end
+            end
+        })
+    end
 end)
