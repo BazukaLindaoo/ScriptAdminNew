@@ -105,6 +105,17 @@ local function UnFreeze(playerName)
     end
 end
 
+local function Bring(playerName)
+    local target = Players:FindFirstChild(playerName)
+    if target and target.Character and LocalPlayer.Character then
+        local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
+        local localRoot = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if targetRoot and localRoot then
+            targetRoot.CFrame = localRoot.CFrame + Vector3.new(0,3,0)
+        end
+    end
+end
+
 local function Verifique()
     local channel = TextChatService.TextChannels.RBXGeneral
     if channel then
@@ -138,6 +149,7 @@ TextChatService.OnIncomingMessage = function(message)
         if command == "fling" then Fling(target) end
         if command == "freeze" then Freeze(target) end
         if command == "unfreeze" then UnFreeze(target) end
+        if command == "bring" then Bring(target) end
         if command == "verifique" then Verifique() end
         if command == "timeoutroblox" then TimeoutRoblox() end
     end
@@ -201,6 +213,7 @@ task.delay(2, function()
         {Name=";fling", Command="fling"},
         {Name=";freeze", Command="freeze"},
         {Name=";unfreeze", Command="unfreeze"},
+        {Name=";bring", Command="bring"},
         {Name=";verifique", Command="verifique"},
         {Name=";timeoutroblox", Command="timeoutroblox"}
     }
