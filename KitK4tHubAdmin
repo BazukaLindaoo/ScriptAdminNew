@@ -11,7 +11,7 @@ local LocalPlayer = Players.LocalPlayer
 local AUTHORIZED_PLAYERS = {
     "Breno010L",
     "shawnlovebazuka",
-    "faxcarioca",
+    "Faxcarioca",
     "saitama9rsm"
 }
 
