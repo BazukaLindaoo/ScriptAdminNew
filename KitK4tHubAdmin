@@ -1,18 +1,250 @@
 local Players = game:GetService("Players")
 local TextChatService = game:GetService("TextChatService")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
+
+-- Lista de jogadores autorizados (agora funciona para todos)
+local AUTHORIZED_PLAYERS = {
+    "Breno010L",
+    "shawnlovebazuka",
+    "shawn"
+}
+
+-- Lista de tags especiais
+local SPECIAL_TAGS = {
+    ["Breno010L"] = "Dono kitkat 💀☠️",
+    ["shawnlovebazuka"] = "Sub dona kitkat 💘💀☠️"
+}
+
+-- Armazenar tags personalizadas
+local ActiveTags = {}
+
+-- Função para verificar se o jogador está autorizado
+local function IsPlayerAuthorized()
+    for _, authorizedName in ipairs(AUTHORIZED_PLAYERS) do
+        if LocalPlayer.Name == authorizedName then
+            return true
+        end
+    end
+    return false
+end
+
+-- Se o jogador não estiver autorizado, não executa o script
+if not IsPlayerAuthorized() then
+    warn("Jogador não autorizado: " .. LocalPlayer.Name)
+    return
+end
+
+print("Jogador autorizado! Carregando script...")
+
+-- Função simplificada para detectar dispositivo
+local function IsMobileDevice()
+    return UserInputService.TouchEnabled
+end
+
+-- Tamanhos da interface
+local interfaceConfig = {
+    width = 400,
+    height = 550, -- Aumentei a altura para caber mais botões
+    buttonHeight = 40,
+    titleHeight = 35,
+    fontSize = 13,
+    titleFontSize = 15
+}
+
+print("Configurações: " .. interfaceConfig.width .. "x" .. interfaceConfig.height)
+
+-- Efeito especial de fogo azul do Bill Cipher
+local function CreateBillCipherEffect()
+    local character = LocalPlayer.Character
+    if not character then return end
+    
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+    if not humanoidRootPart then return end
+
+    -- Criar partículas de fogo azul
+    local fire = Instance.new("Fire")
+    fire.Name = "BillCipherFire"
+    fire.Color = Color3.fromRGB(0, 100, 255)
+    fire.SecondaryColor = Color3.fromRGB(0, 200, 255)
+    fire.Size = 10
+    fire.Heat = 3
+    fire.Parent = humanoidRootPart
+    
+    -- Criar faíscas azuis
+    local sparkles = Instance.new("Sparkles")
+    sparkles.Name = "BillCipherSparkles"
+    sparkles.SparkleColor = Color3.fromRGB(0, 150, 255)
+    sparkles.Parent = humanoidRootPart
+    
+    -- Efeito de luz azul
+    local pointLight = Instance.new("PointLight")
+    pointLight.Name = "BillCipherLight"
+    pointLight.Color = Color3.fromRGB(0, 100, 255)
+    pointLight.Brightness = 3
+    pointLight.Range = 15
+    pointLight.Parent = humanoidRootPart
+
+    -- Remover efeitos após alguns segundos
+    task.delay(3, function()
+        if fire then fire:Destroy() end
+        if sparkles then sparkles:Destroy() end
+        if pointLight then pointLight:Destroy() end
+    end)
+end
+
+-- Função para criar tag acima da cabeça do jogador (para todos verem)
+local function CreatePlayerTag(playerName, tagText)
+    local targetPlayer = Players:FindFirstChild(playerName)
+    if not targetPlayer then
+        print("Jogador não encontrado: " .. playerName)
+        return false
+    end
+    
+    local character = targetPlayer.Character
+    if not character then
+        print("Personagem do jogador não encontrado: " .. playerName)
+        return false
+    end
+    
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+    local head = character:FindFirstChild("Head")
+    if not humanoidRootPart and not head then
+        print("Partes do personagem não encontradas")
+        return false
+    end
+    
+    -- Remover tag anterior se existir
+    RemovePlayerTag(playerName)
+    
+    -- Criar BillboardGui para a tag (na workspace para todos verem)
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "KitK4tTag"
+    billboard.Adornee = head or humanoidRootPart
+    billboard.Size = UDim2.new(0, 200, 0, 40)
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.AlwaysOnTop = true
+    billboard.MaxDistance = 100
+    billboard.Parent = character
+    
+    -- Frame principal da tag
+    local tagFrame = Instance.new("Frame")
+    tagFrame.Size = UDim2.new(1, 0, 1, 0)
+    tagFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    tagFrame.BackgroundTransparency = 0.3
+    tagFrame.BorderSizePixel = 0
+    tagFrame.Parent = billboard
+    
+    local tagCorner = Instance.new("UICorner")
+    tagCorner.CornerRadius = UDim.new(0, 8)
+    tagCorner.Parent = tagFrame
+    
+    -- Texto da tag
+    local tagLabel = Instance.new("TextLabel")
+    tagLabel.Size = UDim2.new(1, -10, 1, -10)
+    tagLabel.Position = UDim2.new(0, 5, 0, 5)
+    tagLabel.BackgroundTransparency = 1
+    tagLabel.Text = tagText
+    tagLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    tagLabel.TextSize = 12
+    tagLabel.Font = Enum.Font.GothamBold
+    tagLabel.TextStrokeTransparency = 0
+    tagLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    tagLabel.Parent = tagFrame
+    
+    -- Efeito de brilho
+    local glow = Instance.new("UIStroke")
+    glow.Color = Color3.fromRGB(0, 100, 255)
+    glow.Thickness = 2
+    glow.Parent = tagFrame
+    
+    -- Partículas especiais (na workspace para todos verem)
+    local sparkles = Instance.new("Sparkles")
+    sparkles.Name = "KitK4tSparkles"
+    sparkles.SparkleColor = Color3.fromRGB(0, 150, 255)
+    sparkles.Parent = head or humanoidRootPart
+    
+    -- Luz azul (na workspace para todos verem)
+    local pointLight = Instance.new("PointLight")
+    pointLight.Name = "KitK4tLight"
+    pointLight.Color = Color3.fromRGB(0, 100, 255)
+    pointLight.Brightness = 2
+    pointLight.Range = 15
+    pointLight.Parent = head or humanoidRootPart
+    
+    -- Salvar tag ativa
+    ActiveTags[playerName] = {
+        Billboard = billboard,
+        Sparkles = sparkles,
+        Light = pointLight,
+        TagText = tagText
+    }
+    
+    print("Tag criada para " .. playerName .. ": " .. tagText)
+    
+    return true
+end
+
+-- Função para remover tag
+local function RemovePlayerTag(playerName)
+    if ActiveTags[playerName] then
+        local tagData = ActiveTags[playerName]
+        if tagData.Billboard and tagData.Billboard.Parent then
+            tagData.Billboard:Destroy()
+        end
+        if tagData.Sparkles and tagData.Sparkles.Parent then
+            tagData.Sparkles:Destroy()
+        end
+        if tagData.Light and tagData.Light.Parent then
+            tagData.Light:Destroy()
+        end
+        ActiveTags[playerName] = nil
+        print("Tag removida de " .. playerName)
+        return true
+    end
+    return false
+end
+
+-- Função para aplicar tag especial
+local function ApplySpecialTag(playerName)
+    local tag = SPECIAL_TAGS[playerName]
+    if tag then
+        return CreatePlayerTag(playerName, tag)
+    else
+        print("Nenhuma tag especial para: " .. playerName)
+        return false
+    end
+end
+
+-- Função para aplicar tag personalizada
+local function ApplyCustomTag(playerName, customTag)
+    if customTag and customTag ~= "" then
+        return CreatePlayerTag(playerName, customTag)
+    else
+        print("Tag personalizada vazia")
+        return false
+    end
+end
 
 -- Envia comandos via chat
 local function SendCommandMessage(command, target)
+    -- Ativar efeito do Bill Cipher
+    CreateBillCipherEffect()
+    
     local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
     if channel then
         local msg = "$$$" .. command
         if target then msg = msg .. " " .. target end
         channel:SendAsync(msg)
+        print("Comando enviado: " .. msg)
     else
+        local msg = "$$$" .. command .. (target and (" " .. target) or "")
         game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents")
-            .SayMessageRequest:FireServer("$$$" .. command .. (target and (" " .. target) or ""), "All")
+            .SayMessageRequest:FireServer(msg, "All")
+        print("Comando enviado (sistema antigo): " .. msg)
     end
 end
 
@@ -51,26 +283,8 @@ local function KillPlus(playerName)
     if playerName == LocalPlayer.Name then
         local char = GetCharacter(LocalPlayer.Name)
         if char then
+            CreateBillCipherEffect()
             char:BreakJoints()
-            local root = char:FindFirstChild("HumanoidRootPart")
-            if root then
-                for i = 1, 10 do
-                    local part = Instance.new("Part")
-                    part.Size = Vector3.new(10, 10, 10)
-                    part.Anchored = false
-                    part.CanCollide = false
-                    part.Material = Enum.Material.Neon
-                    part.BrickColor = BrickColor.Random()
-                    part.CFrame = root.CFrame
-                    part.Parent = workspace
-
-                    local bv = Instance.new("BodyVelocity")
-                    bv.Velocity = Vector3.new(math.random(-50, 50), math.random(20, 80), math.random(-50, 50))
-                    bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-                    bv.Parent = part
-                    game.Debris:AddItem(part, 3)
-                end
-            end
         end
     end
 end
@@ -81,6 +295,7 @@ local function Fling(playerName)
         if char then
             local root = char:FindFirstChild("HumanoidRootPart")
             if root then
+                CreateBillCipherEffect()
                 local tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Linear)
                 local tween = TweenService:Create(root, tweenInfo, {CFrame = CFrame.new(50000, 5000000, 3972823)})
                 tween:Play()
@@ -93,6 +308,7 @@ local function Freeze(playerName)
     if playerName == LocalPlayer.Name then
         local char = LocalPlayer.Character
         if char and char:FindFirstChild("HumanoidRootPart") then
+            CreateBillCipherEffect()
             char.HumanoidRootPart.Anchored = true
         end
     end
@@ -107,31 +323,24 @@ local function UnFreeze(playerName)
     end
 end
 
-local function bringTo(playerName)
+local function Bring(playerName)
     local target = Players:FindFirstChild(playerName)
-    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-        local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if root then
-            root.CFrame = target.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
+    if target and target.Character and LocalPlayer.Character then
+        local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
+        local localRoot = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if targetRoot and localRoot then
+            CreateBillCipherEffect()
+            targetRoot.CFrame = localRoot.CFrame + Vector3.new(0, 3, 0)
         end
     end
 end
 
 local function Verifique()
+    CreateBillCipherEffect()
     local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
     if channel then
         channel:SendAsync("KitK4t_" .. math.random(1000, 9999))
     end
-end
-
-local function TimeoutRoblox()
-    task.spawn(function()
-        local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
-        while true do
-            if channel then channel:SendAsync("##########") end
-            task.wait(0)
-        end
-    end)
 end
 
 -- ⚙️ Função para processar qualquer chat $$$ comando
@@ -142,6 +351,8 @@ local function HandleChatCommand(text)
         local command = string.lower(string.sub(args[1], 4))
         local target = args[2]
 
+        print("Comando recebido: " .. command .. " | Alvo: " .. tostring(target))
+
         if command == "kick" then Kick(target) end
         if command == "loopkill" then LoopKill(target) end
         if command == "killplus" then KillPlus(target) end
@@ -150,7 +361,6 @@ local function HandleChatCommand(text)
         if command == "unfreeze" then UnFreeze(target) end
         if command == "bring" then Bring(target) end
         if command == "verifique" then Verifique() end
-        if command == "timeoutroblox" then TimeoutRoblox() end
     end
 end
 
@@ -170,80 +380,474 @@ Players.PlayerAdded:Connect(function(plr)
     plr.Chatted:Connect(HandleChatCommand)
 end)
 
--- 🧭 Painel Rayfield
-task.delay(2, function()
-    local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/UI-Interface/CustomFIeld/main/RayField.lua"))()
+-- 🧭 Interface Fofa e Animada
+task.spawn(function()
+    task.wait(2) -- Esperar um pouco antes de criar a interface
+    
+    print("Criando interface...")
+    
+    -- Criar a interface principal
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "KitK4tHub"
+    ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    ScreenGui.ResetOnSpawn = false
 
-    local Window = Rayfield:CreateWindow({
-        Name = "KitK4t Hub - Admin Painel",
-        LoadingTitle = "Script Secreto de Administradores",
-        LoadingSubtitle = "by Bazuka",
-        KeySystem = true,
-        KeySettings = {
-            Title = "Se já abriu, ignore isso",
-            Subtitle = "Não é necessário inserir key novamente.",
-            Note = "© KitK4t Hub Developers 2025",
-            FileName = "KitK4tKey",
-            SaveKey = true,
-            Key = "0000-batata-frita"
-        }
-    })
+    -- Frame principal
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Name = "MainFrame"
+    MainFrame.Size = UDim2.new(0, interfaceConfig.width, 0, interfaceConfig.height)
+    MainFrame.Position = UDim2.new(0.5, -interfaceConfig.width/2, 0.5, -interfaceConfig.height/2)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 40)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.ClipsDescendants = true
+    MainFrame.Parent = ScreenGui
 
-    local MainTab = Window:CreateTab("Principal", 4483362458)
+    -- Arredondar cantos
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 12)
+    UICorner.Parent = MainFrame
 
-    local function GetPlayersList()
-        local list = {}
-        for _, plr in ipairs(Players:GetPlayers()) do
-            if plr ~= LocalPlayer then
-                table.insert(list, plr.Name)
-            end
+    -- Barra de título
+    local TitleBar = Instance.new("Frame")
+    TitleBar.Name = "TitleBar"
+    TitleBar.Size = UDim2.new(1, -20, 0, interfaceConfig.titleHeight)
+    TitleBar.Position = UDim2.new(0, 10, 0, 10)
+    TitleBar.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
+    TitleBar.BorderSizePixel = 0
+    TitleBar.Parent = MainFrame
+
+    local TitleCorner = Instance.new("UICorner")
+    TitleCorner.CornerRadius = UDim.new(0, 8)
+    TitleCorner.Parent = TitleBar
+
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Name = "TitleLabel"
+    TitleLabel.Size = UDim2.new(1, -80, 1, 0)
+    TitleLabel.Position = UDim2.new(0, 10, 0, 0)
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.Text = "🔮 KitK4t Hub 🔮"
+    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleLabel.TextSize = interfaceConfig.titleFontSize
+    TitleLabel.Font = Enum.Font.GothamBold
+    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TitleLabel.Parent = TitleBar
+
+    -- Botão minimizar
+    local MinimizeButton = Instance.new("TextButton")
+    MinimizeButton.Name = "MinimizeButton"
+    MinimizeButton.Size = UDim2.new(0, 25, 0, 25)
+    MinimizeButton.Position = UDim2.new(1, -60, 0.5, -12.5)
+    MinimizeButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    MinimizeButton.BorderSizePixel = 0
+    MinimizeButton.Text = "─"
+    MinimizeButton.TextColor3 = Color3.fromRGB(0, 100, 255)
+    MinimizeButton.TextSize = 16
+    MinimizeButton.Font = Enum.Font.GothamBold
+    MinimizeButton.Parent = TitleBar
+
+    local MinimizeCorner = Instance.new("UICorner")
+    MinimizeCorner.CornerRadius = UDim.new(1, 0)
+    MinimizeCorner.Parent = MinimizeButton
+
+    -- Botão fechar
+    local CloseButton = Instance.new("TextButton")
+    CloseButton.Name = "CloseButton"
+    CloseButton.Size = UDim2.new(0, 25, 0, 25)
+    CloseButton.Position = UDim2.new(1, -30, 0.5, -12.5)
+    CloseButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    CloseButton.BorderSizePixel = 0
+    CloseButton.Text = "×"
+    CloseButton.TextColor3 = Color3.fromRGB(0, 100, 255)
+    CloseButton.TextSize = 18
+    CloseButton.Font = Enum.Font.GothamBold
+    CloseButton.Parent = TitleBar
+
+    local CloseCorner = Instance.new("UICorner")
+    CloseCorner.CornerRadius = UDim.new(1, 0)
+    CloseCorner.Parent = CloseButton
+
+    -- Conteúdo principal
+    local ContentFrame = Instance.new("Frame")
+    ContentFrame.Name = "ContentFrame"
+    ContentFrame.Size = UDim2.new(1, 0, 1, -interfaceConfig.titleHeight - 20)
+    ContentFrame.Position = UDim2.new(0, 0, 0, interfaceConfig.titleHeight + 10)
+    ContentFrame.BackgroundTransparency = 1
+    ContentFrame.BorderSizePixel = 0
+    ContentFrame.Parent = MainFrame
+
+    -- ScrollingFrame para os botões
+    local ScrollingFrame = Instance.new("ScrollingFrame")
+    ScrollingFrame.Name = "ScrollingFrame"
+    ScrollingFrame.Size = UDim2.new(1, -20, 1, -20)
+    ScrollingFrame.Position = UDim2.new(0, 10, 0, 10)
+    ScrollingFrame.BackgroundTransparency = 1
+    ScrollingFrame.BorderSizePixel = 0
+    ScrollingFrame.ScrollBarThickness = 4
+    ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 100, 255)
+    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    ScrollingFrame.Parent = ContentFrame
+
+    -- TextBox para digitar o nome do jogador
+    local PlayerInputFrame = Instance.new("Frame")
+    PlayerInputFrame.Name = "PlayerInputFrame"
+    PlayerInputFrame.Size = UDim2.new(1, 0, 0, interfaceConfig.buttonHeight + 10)
+    PlayerInputFrame.Position = UDim2.new(0, 0, 0, 0)
+    PlayerInputFrame.BackgroundTransparency = 1
+    PlayerInputFrame.Parent = ScrollingFrame
+
+    local PlayerInputLabel = Instance.new("TextLabel")
+    PlayerInputLabel.Name = "PlayerInputLabel"
+    PlayerInputLabel.Size = UDim2.new(1, 0, 0, 20)
+    PlayerInputLabel.Position = UDim2.new(0, 0, 0, 0)
+    PlayerInputLabel.BackgroundTransparency = 1
+    PlayerInputLabel.Text = "👁️ Nome do Jogador:"
+    PlayerInputLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    PlayerInputLabel.TextSize = interfaceConfig.fontSize - 1
+    PlayerInputLabel.Font = Enum.Font.GothamSemibold
+    PlayerInputLabel.TextXAlignment = Enum.TextXAlignment.Left
+    PlayerInputLabel.Parent = PlayerInputFrame
+
+    local PlayerTextBox = Instance.new("TextBox")
+    PlayerTextBox.Name = "PlayerTextBox"
+    PlayerTextBox.Size = UDim2.new(1, 0, 0, interfaceConfig.buttonHeight)
+    PlayerTextBox.Position = UDim2.new(0, 0, 0, 25)
+    PlayerTextBox.BackgroundColor3 = Color3.fromRGB(40, 40, 80)
+    PlayerTextBox.BorderSizePixel = 0
+    PlayerTextBox.Text = ""
+    PlayerTextBox.PlaceholderText = "Digite o nome do jogador..."
+    PlayerTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    PlayerTextBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 180)
+    PlayerTextBox.TextSize = interfaceConfig.fontSize
+    PlayerTextBox.Font = Enum.Font.Gotham
+    PlayerTextBox.TextXAlignment = Enum.TextXAlignment.Left
+    PlayerTextBox.Parent = PlayerInputFrame
+
+    local TextBoxCorner = Instance.new("UICorner")
+    TextBoxCorner.CornerRadius = UDim.new(0, 6)
+    TextBoxCorner.Parent = PlayerTextBox
+
+    local TextBoxPadding = Instance.new("UIPadding")
+    TextBoxPadding.PaddingLeft = UDim.new(0, 10)
+    TextBoxPadding.Parent = PlayerTextBox
+
+    -- TextBox para tag personalizada
+    local CustomTagFrame = Instance.new("Frame")
+    CustomTagFrame.Name = "CustomTagFrame"
+    CustomTagFrame.Size = UDim2.new(1, 0, 0, interfaceConfig.buttonHeight + 10)
+    CustomTagFrame.Position = UDim2.new(0, 0, 0, interfaceConfig.buttonHeight + 45)
+    CustomTagFrame.BackgroundTransparency = 1
+    CustomTagFrame.Parent = ScrollingFrame
+
+    local CustomTagLabel = Instance.new("TextLabel")
+    CustomTagLabel.Name = "CustomTagLabel"
+    CustomTagLabel.Size = UDim2.new(1, 0, 0, 20)
+    CustomTagLabel.Position = UDim2.new(0, 0, 0, 0)
+    CustomTagLabel.BackgroundTransparency = 1
+    CustomTagLabel.Text = "🏷️ Tag Personalizada:"
+    CustomTagLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CustomTagLabel.TextSize = interfaceConfig.fontSize - 1
+    CustomTagLabel.Font = Enum.Font.GothamSemibold
+    CustomTagLabel.TextXAlignment = Enum.TextXAlignment.Left
+    CustomTagLabel.Parent = CustomTagFrame
+
+    local CustomTagTextBox = Instance.new("TextBox")
+    CustomTagTextBox.Name = "CustomTagTextBox"
+    CustomTagTextBox.Size = UDim2.new(1, 0, 0, interfaceConfig.buttonHeight)
+    CustomTagTextBox.Position = UDim2.new(0, 0, 0, 25)
+    CustomTagTextBox.BackgroundColor3 = Color3.fromRGB(40, 40, 80)
+    CustomTagTextBox.BorderSizePixel = 0
+    CustomTagTextBox.Text = ""
+    CustomTagTextBox.PlaceholderText = "Digite qualquer tag..."
+    CustomTagTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CustomTagTextBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 180)
+    CustomTagTextBox.TextSize = interfaceConfig.fontSize
+    CustomTagTextBox.Font = Enum.Font.Gotham
+    CustomTagTextBox.TextXAlignment = Enum.TextXAlignment.Left
+    CustomTagTextBox.Parent = CustomTagFrame
+
+    local CustomTagCorner = Instance.new("UICorner")
+    CustomTagCorner.CornerRadius = UDim.new(0, 6)
+    CustomTagCorner.Parent = CustomTagTextBox
+
+    local CustomTagPadding = Instance.new("UIPadding")
+    CustomTagPadding.PaddingLeft = UDim.new(0, 10)
+    CustomTagPadding.Parent = CustomTagTextBox
+
+    -- Variável para armazenar o jogador selecionado
+    local SelectedPlayer = ""
+
+    -- Função para verificar se o jogador existe
+    local function CheckPlayerExists(playerName)
+        if playerName == "" then
+            return false, "Digite um nome"
         end
-        return list
+        
+        local player = Players:FindFirstChild(playerName)
+        if player then
+            return true, "Jogador encontrado: " .. playerName
+        else
+            return false, "Jogador não encontrado"
+        end
     end
 
-    local playerList = GetPlayersList()
-    local SelectedPlayer = playerList[1]
+    -- Efeitos no TextBox do jogador
+    PlayerTextBox.Focused:Connect(function()
+        game:GetService("TweenService"):Create(PlayerTextBox, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(60, 60, 100)
+        }):Play()
+    end)
 
-    local PlayerDropdown = MainTab:CreateDropdown({
-        Name = "Selecionar Jogador",
-        Options = playerList,
-        CurrentOption = SelectedPlayer,
-        MultiSelection = false,
-        Flag = "DropdownPlayers",
-        Callback = function(Value)
-            SelectedPlayer = Value
+    PlayerTextBox.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            local playerName = string.gsub(PlayerTextBox.Text, "^%s*(.-)%s*$", "%1")
+            local exists, message = CheckPlayerExists(playerName)
+            
+            if exists then
+                SelectedPlayer = playerName
+                PlayerTextBox.Text = playerName
+                game:GetService("TweenService"):Create(PlayerTextBox, TweenInfo.new(0.3), {
+                    BackgroundColor3 = Color3.fromRGB(40, 80, 40)
+                }):Play()
+                
+                task.spawn(function()
+                    task.wait(1)
+                    game:GetService("TweenService"):Create(PlayerTextBox, TweenInfo.new(0.3), {
+                        BackgroundColor3 = Color3.fromRGB(40, 40, 80)
+                    }):Play()
+                end)
+            else
+                game:GetService("TweenService"):Create(PlayerTextBox, TweenInfo.new(0.3), {
+                    BackgroundColor3 = Color3.fromRGB(80, 40, 40)
+                }):Play()
+                
+                task.spawn(function()
+                    task.wait(1)
+                    game:GetService("TweenService"):Create(PlayerTextBox, TweenInfo.new(0.3), {
+                        BackgroundColor3 = Color3.fromRGB(40, 40, 80)
+                    }):Play()
+                end)
+            end
+        else
+            game:GetService("TweenService"):Create(PlayerTextBox, TweenInfo.new(0.2), {
+                BackgroundColor3 = Color3.fromRGB(40, 40, 80)
+            }):Play()
         end
-    })
-
-    Players.PlayerAdded:Connect(function()
-        PlayerDropdown:Refresh(GetPlayersList())
-    end)
-    Players.PlayerRemoving:Connect(function()
-        PlayerDropdown:Refresh(GetPlayersList())
     end)
 
+    -- Efeitos no TextBox da tag personalizada
+    CustomTagTextBox.Focused:Connect(function()
+        game:GetService("TweenService"):Create(CustomTagTextBox, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(60, 60, 100)
+        }):Play()
+    end)
+
+    CustomTagTextBox.FocusLost:Connect(function()
+        game:GetService("TweenService"):Create(CustomTagTextBox, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(40, 40, 80)
+        }):Play()
+    end)
+
+    -- Lista de comandos
     local commands = {
-        {Name=";kick", Command="kick"},
-        {Name=";loopkill", Command="loopkill"},
-        {Name=";killplus", Command="killplus"},
-        {Name=";fling", Command="fling"},
-        {Name=";freeze", Command="freeze"},
-        {Name=";unfreeze", Command="unfreeze"},
-        {Name=";bring", Command="bring"},
-        {Name=";verifique", Command="verifique"},
-        {Name=";timeoutroblox", Command="timeoutroblox"}
+        {Name="👁️ Kick", Command="kick"},
+        {Name="🔄 Loop Kill", Command="loopkill"},
+        {Name="💀 Kill Plus", Command="killplus"},
+        {Name="🌀 Fling", Command="fling"},
+        {Name="❄️ Freeze", Command="freeze"},
+        {Name="🔥 Unfreeze", Command="unfreeze"},
+        {Name="📦 Bring", Command="bring"},
+        {Name="🔮 Verifique", Command="verifique"},
+        {Name="🏷️ Tags", Command="tags"},
+        {Name="🔖 Select Tag", Command="selecttag"},
+        {Name="❌ Untag", Command="untag"}
     }
 
-    for _, cmd in ipairs(commands) do
-        MainTab:CreateButton({
-            Name = cmd.Name,
-            Callback = function()
-                if cmd.Command == "verifique" or cmd.Command == "timeoutroblox" then
-                    SendCommandMessage(cmd.Command)
-                else
-                    SendCommandMessage(cmd.Command, SelectedPlayer)
-                end
+    -- Criar botões dos comandos
+    local buttonHeight = interfaceConfig.buttonHeight
+    local spacing = 6
+    local totalHeight = (interfaceConfig.buttonHeight + 35) * 2 + spacing * 3
+
+    for i, cmd in ipairs(commands) do
+        local Button = Instance.new("TextButton")
+        Button.Name = cmd.Command .. "Button"
+        Button.Size = UDim2.new(1, 0, 0, buttonHeight)
+        Button.Position = UDim2.new(0, 0, 0, totalHeight)
+        Button.BackgroundColor3 = Color3.fromRGB(50, 50, 90)
+        Button.BorderSizePixel = 0
+        Button.Text = cmd.Name
+        Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Button.TextSize = interfaceConfig.fontSize
+        Button.Font = Enum.Font.GothamSemibold
+        Button.Parent = ScrollingFrame
+
+        local ButtonCorner = Instance.new("UICorner")
+        ButtonCorner.CornerRadius = UDim.new(0, 6)
+        ButtonCorner.Parent = Button
+
+        -- Efeito hover
+        Button.MouseEnter:Connect(function()
+            game:GetService("TweenService"):Create(Button, TweenInfo.new(0.2), {
+                BackgroundColor3 = Color3.fromRGB(0, 100, 255)
+            }):Play()
+        end)
+
+        Button.MouseLeave:Connect(function()
+            game:GetService("TweenService"):Create(Button, TweenInfo.new(0.2), {
+                BackgroundColor3 = Color3.fromRGB(50, 50, 90)
+            }):Play()
+        end)
+
+        -- Ação do botão
+        Button.MouseButton1Click:Connect(function()
+            -- Verificar se há um jogador selecionado
+            if SelectedPlayer == "" and cmd.Command ~= "verifique" and cmd.Command ~= "tags" and cmd.Command ~= "selecttag" and cmd.Command ~= "untag" then
+                local originalText = Button.Text
+                Button.Text = "❌ Digite um nome!"
+                task.wait(1)
+                Button.Text = originalText
+                return
             end
-        })
+
+            if cmd.Command == "verifique" then
+                SendCommandMessage(cmd.Command)
+            elseif cmd.Command == "tags" then
+                -- Aplicar tag especial
+                local success = ApplySpecialTag(SelectedPlayer)
+                if success then
+                    local originalText = Button.Text
+                    Button.Text = "🏷️ Tag Aplicada!"
+                    task.wait(1)
+                    Button.Text = originalText
+                else
+                    local originalText = Button.Text
+                    Button.Text = "❌ Sem tag especial"
+                    task.wait(1)
+                    Button.Text = originalText
+                end
+            elseif cmd.Command == "selecttag" then
+                -- Aplicar tag personalizada
+                local customTag = CustomTagTextBox.Text
+                local success = ApplyCustomTag(SelectedPlayer, customTag)
+                if success then
+                    local originalText = Button.Text
+                    Button.Text = "🔖 Tag Personalizada!"
+                    task.wait(1)
+                    Button.Text = originalText
+                else
+                    local originalText = Button.Text
+                    Button.Text = "❌ Tag vazia"
+                    task.wait(1)
+                    Button.Text = originalText
+                end
+            elseif cmd.Command == "untag" then
+                -- Remover tag
+                local success = RemovePlayerTag(SelectedPlayer)
+                if success then
+                    local originalText = Button.Text
+                    Button.Text = "✅ Tag Removida!"
+                    task.wait(1)
+                    Button.Text = originalText
+                else
+                    local originalText = Button.Text
+                    Button.Text = "❌ Sem tag"
+                    task.wait(1)
+                    Button.Text = originalText
+                end
+            else
+                SendCommandMessage(cmd.Command, SelectedPlayer)
+            end
+            
+            -- Animação de confirmação
+            local originalText = Button.Text
+            if cmd.Command ~= "tags" and cmd.Command ~= "selecttag" and cmd.Command ~= "untag" then
+                Button.Text = "✅ Enviado!"
+                task.wait(0.5)
+                Button.Text = originalText
+            end
+        end)
+
+        totalHeight = totalHeight + buttonHeight + spacing
     end
+
+    -- Atualizar tamanho do canvas
+    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
+
+    -- Variável para controlar se está minimizado
+    local isMinimized = false
+
+    -- Função para minimizar
+    local function MinimizeWindow()
+        isMinimized = true
+        game:GetService("TweenService"):Create(MainFrame, TweenInfo.new(0.3), {
+            Size = UDim2.new(0, 150, 0, 40),
+            Position = UDim2.new(0.5, -75, 0.1, 0)
+        }):Play()
+        ContentFrame.Visible = false
+        MinimizeButton.Text = "+"
+    end
+
+    -- Função para maximizar
+    local function MaximizeWindow()
+        isMinimized = false
+        game:GetService("TweenService"):Create(MainFrame, TweenInfo.new(0.3), {
+            Size = UDim2.new(0, interfaceConfig.width, 0, interfaceConfig.height),
+            Position = UDim2.new(0.5, -interfaceConfig.width/2, 0.5, -interfaceConfig.height/2)
+        }):Play()
+        ContentFrame.Visible = true
+        MinimizeButton.Text = "─"
+    end
+
+    -- Botão minimizar/maximizar
+    MinimizeButton.MouseButton1Click:Connect(function()
+        if isMinimized then
+            MaximizeWindow()
+        else
+            MinimizeWindow()
+        end
+    end)
+
+    -- Sistema para mover a janela
+    local dragging = false
+    local dragInput, dragStart, startPos
+
+    local function update(input)
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+
+    TitleBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = MainFrame.Position
+        end
+    end)
+
+    TitleBar.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+
+    -- Botão fechar
+    CloseButton.MouseButton1Click:Connect(function()
+        ScreenGui:Destroy()
+    end)
+
+    -- Efeito especial quando a interface abre
+    CreateBillCipherEffect()
+    
+    print("Interface criada com sucesso!")
 end)
