@@ -297,6 +297,9 @@ local function UnFreeze(playerName)
     end
 end
 
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
 local function bringTo(playerName)
     local target = Players:FindFirstChild(playerName)
     if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
