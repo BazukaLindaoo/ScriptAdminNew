@@ -351,15 +351,12 @@ local function UnFreeze(playerName)
     end
 end
 
-local function Bring(playerName)
+local function bringTo(playerName)
     local target = Players:FindFirstChild(playerName)
-    if target and target.Character and LocalPlayer.Character then
-        local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
-        local localRoot = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if targetRoot and localRoot then
-            -- Efeito especial ao trazer jogador
-            CreateBillCipherEffect()
-            targetRoot.CFrame = localRoot.CFrame + Vector3.new(0, 3, 0)
+    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+        local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if root then
+            root.CFrame = target.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
         end
     end
 end
