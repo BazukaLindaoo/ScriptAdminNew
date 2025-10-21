@@ -19,6 +19,7 @@ local AUTHORIZED_PLAYERS = {
     "Faxcarioca"
 }
 
+
 -- Lista de tags especiais
 local SPECIAL_TAGS = {
     ["Breno010L"] = "Dono KitK4t",
@@ -27,47 +28,6 @@ local SPECIAL_TAGS = {
 
 -- Armazenar tags personalizadas
 local ActiveTags = {}
-
--- Configurações de cores
-local THEME_COLORS = {
-    azul = {
-        primary = Color3.fromRGB(0, 100, 255),
-        secondary = Color3.fromRGB(0, 150, 255),
-        background = Color3.fromRGB(25, 25, 45),
-        text = Color3.fromRGB(255, 255, 255),
-        fire_color = Color3.fromRGB(0, 100, 255),
-        fire_secondary = Color3.fromRGB(0, 200, 255)
-    },
-    verde = {
-        primary = Color3.fromRGB(0, 255, 100),
-        secondary = Color3.fromRGB(100, 255, 150),
-        background = Color3.fromRGB(25, 45, 25),
-        text = Color3.fromRGB(255, 255, 255),
-        fire_color = Color3.fromRGB(0, 255, 100),
-        fire_secondary = Color3.fromRGB(100, 255, 150)
-    },
-    preto = {
-        primary = Color3.fromRGB(50, 50, 50),
-        secondary = Color3.fromRGB(100, 100, 100),
-        background = Color3.fromRGB(15, 15, 15),
-        text = Color3.fromRGB(255, 255, 255),
-        fire_color = Color3.fromRGB(255, 255, 255),
-        fire_secondary = Color3.fromRGB(200, 200, 200)
-    },
-    transparente = {
-        primary = Color3.fromRGB(255, 182, 193),
-        secondary = Color3.fromRGB(255, 105, 180),
-        background = Color3.fromRGB(255, 240, 245),
-        text = Color3.fromRGB(75, 75, 75),
-        fire_color = Color3.fromRGB(255, 182, 193),
-        fire_secondary = Color3.fromRGB(255, 105, 180)
-    }
-}
-
--- Variáveis globais
-local SelectedDevice = "mobile"
-local SelectedColor = "transparente"
-local CurrentTheme = THEME_COLORS.transparente
 
 -- Função para verificar se o jogador está autorizado
 local function IsPlayerAuthorized()
@@ -84,28 +44,15 @@ if not IsPlayerAuthorized() then
     return
 end
 
--- Tamanhos da interface baseados no dispositivo
-local function GetInterfaceConfig(device)
-    if device == "pc" then
-        return {
-            width = 400,
-            height = 500,
-            buttonHeight = 40,
-            titleHeight = 45,
-            fontSize = 14,
-            titleFontSize = 16
-        }
-    else
-        return {
-            width = 320,
-            height = 420,
-            buttonHeight = 36,
-            titleHeight = 40,
-            fontSize = 12,
-            titleFontSize = 14
-        }
-    end
-end
+-- Tamanhos da interface
+local interfaceConfig = {
+    width = 280,
+    height = 350,
+    buttonHeight = 30,
+    titleHeight = 25,
+    fontSize = 11,
+    titleFontSize = 12
+}
 
 -- Função para autocompletar nomes
 local function AutoCompleteName(partialName)
@@ -134,8 +81,8 @@ local function AutoCompleteName(partialName)
     return nil
 end
 
--- Efeito especial de fogo baseado na cor selecionada
-local function CreateThemeEffect()
+-- Efeito especial de fogo azul do Bill Cipher
+local function CreateBillCipherEffect()
     local character = LocalPlayer.Character
     if not character then return end
     
@@ -143,9 +90,9 @@ local function CreateThemeEffect()
     if not humanoidRootPart then return end
 
     local fire = Instance.new("Fire")
-    fire.Name = "ThemeFire"
-    fire.Color = CurrentTheme.fire_color
-    fire.SecondaryColor = CurrentTheme.fire_secondary
+    fire.Name = "BillCipherFire"
+    fire.Color = Color3.fromRGB(0, 100, 255)
+    fire.SecondaryColor = Color3.fromRGB(0, 200, 255)
     fire.Size = 8
     fire.Heat = 2
     fire.Parent = humanoidRootPart
@@ -182,13 +129,13 @@ local function CreatePlayerTag(playerName, tagText)
     -- Frame principal da tag
     local tagFrame = Instance.new("Frame")
     tagFrame.Size = UDim2.new(1, 0, 1, 0)
-    tagFrame.BackgroundColor3 = CurrentTheme.primary
-    tagFrame.BackgroundTransparency = 0.2
+    tagFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    tagFrame.BackgroundTransparency = 0.3
     tagFrame.BorderSizePixel = 0
     tagFrame.Parent = billboard
     
     local tagCorner = Instance.new("UICorner")
-    tagCorner.CornerRadius = UDim.new(0, 12)
+    tagCorner.CornerRadius = UDim.new(0, 6)
     tagCorner.Parent = tagFrame
     
     -- Texto da tag
@@ -197,17 +144,17 @@ local function CreatePlayerTag(playerName, tagText)
     tagLabel.Position = UDim2.new(0, 4, 0, 4)
     tagLabel.BackgroundTransparency = 1
     tagLabel.Text = tagText
-    tagLabel.TextColor3 = CurrentTheme.text
+    tagLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     tagLabel.TextSize = 10
     tagLabel.Font = Enum.Font.GothamBold
     tagLabel.TextStrokeTransparency = 0
-    tagLabel.TextStrokeColor3 = CurrentTheme.secondary
+    tagLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     tagLabel.Parent = tagFrame
     
     -- Efeito de brilho
     local glow = Instance.new("UIStroke")
-    glow.Color = CurrentTheme.secondary
-    glow.Thickness = 2
+    glow.Color = Color3.fromRGB(0, 100, 255)
+    glow.Thickness = 1
     glow.Parent = tagFrame
     
     -- Salvar tag ativa
@@ -251,7 +198,7 @@ end
 
 -- Envia comandos via chat
 local function SendCommandMessage(command, target)
-    CreateThemeEffect()
+    CreateBillCipherEffect()
     
     local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
     if channel then
@@ -300,7 +247,7 @@ local function KillPlus(playerName)
     if playerName == LocalPlayer.Name then
         local char = GetCharacter(LocalPlayer.Name)
         if char then
-            CreateThemeEffect()
+            CreateBillCipherEffect()
             char:BreakJoints()
         end
     end
@@ -312,7 +259,7 @@ local function Fling(playerName)
         if char then
             local root = char:FindFirstChild("HumanoidRootPart")
             if root then
-                CreateThemeEffect()
+                CreateBillCipherEffect()
                 local tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Linear)
                 local tween = TweenService:Create(root, tweenInfo, {CFrame = CFrame.new(50000, 5000000, 3972823)})
                 tween:Play()
@@ -325,7 +272,7 @@ local function Freeze(playerName)
     if playerName == LocalPlayer.Name then
         local char = LocalPlayer.Character
         if char and char:FindFirstChild("HumanoidRootPart") then
-            CreateThemeEffect()
+            CreateBillCipherEffect()
             char.HumanoidRootPart.Anchored = true
         end
     end
@@ -341,19 +288,27 @@ local function UnFreeze(playerName)
 end
 
 local function Bring(playerName)
-    local target = Players:FindFirstChild(playerName)
-    if target and target.Character and LocalPlayer.Character then
-        local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
-        local localRoot = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if targetRoot and localRoot then
-            CreateThemeEffect()
-            targetRoot.CFrame = localRoot.CFrame + Vector3.new(0, 3, 0)
+    if playerName == LocalPlayer.Name then
+        local char = LocalPlayer.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            local sender = nil
+            for _, plr in ipairs(Players:GetPlayers()) do
+                if ActiveTags[plr.Name] then
+                    sender = plr
+                    break
+                end
+            end
+            if sender and sender.Character and sender.Character:FindFirstChild("HumanoidRootPart") then
+                CreateBillCipherEffect()
+                hrp.CFrame = sender.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
+            end
         end
     end
 end
 
 local function Verifique()
-    CreateThemeEffect()
+    CreateBillCipherEffect()
     local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
     if channel then
         channel:SendAsync("KitK4t_" .. math.random(1000, 9999))
@@ -395,232 +350,11 @@ Players.PlayerAdded:Connect(function(plr)
     plr.Chatted:Connect(HandleChatCommand)
 end)
 
--- 🎮 TELA DE SELEÇÃO DE DISPOSITIVO
-local function CreateDeviceSelectionScreen()
-    local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "DeviceSelectionScreen"
-    ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-    ScreenGui.ResetOnSpawn = false
-
-    -- Fundo preto
-    local BlackBackground = Instance.new("Frame")
-    BlackBackground.Size = UDim2.new(1, 0, 1, 0)
-    BlackBackground.Position = UDim2.new(0, 0, 0, 0)
-    BlackBackground.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    BlackBackground.BackgroundTransparency = 0.2
-    BlackBackground.BorderSizePixel = 0
-    BlackBackground.ZIndex = 1
-    BlackBackground.Parent = ScreenGui
-
-    -- Frame principal
-    local MainFrame = Instance.new("Frame")
-    MainFrame.Name = "MainFrame"
-    MainFrame.Size = UDim2.new(0, 300, 0, 200)
-    MainFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    MainFrame.BorderSizePixel = 0
-    MainFrame.ClipsDescendants = true
-    MainFrame.ZIndex = 2
-    MainFrame.Parent = ScreenGui
-
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 20)
-    UICorner.Parent = MainFrame
-
-    local UIStroke = Instance.new("UIStroke")
-    UIStroke.Color = Color3.fromRGB(100, 100, 255)
-    UIStroke.Thickness = 3
-    UIStroke.Parent = MainFrame
-
-    -- Título
-    local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Size = UDim2.new(1, -20, 0, 50)
-    TitleLabel.Position = UDim2.new(0, 10, 0, 10)
-    TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Text = "📱 Selecione seu Dispositivo 📱"
-    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TitleLabel.TextSize = 16
-    TitleLabel.Font = Enum.Font.GothamBold
-    TitleLabel.ZIndex = 3
-    TitleLabel.Parent = MainFrame
-
-    -- Botão Mobile
-    local MobileButton = Instance.new("TextButton")
-    MobileButton.Name = "MobileButton"
-    MobileButton.Size = UDim2.new(0.8, 0, 0, 45)
-    MobileButton.Position = UDim2.new(0.1, 0, 0.4, 0)
-    MobileButton.BackgroundColor3 = Color3.fromRGB(100, 100, 255)
-    MobileButton.BorderSizePixel = 0
-    MobileButton.Text = "📱 Mobile"
-    MobileButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    MobileButton.TextSize = 14
-    MobileButton.Font = Enum.Font.GothamBold
-    MobileButton.ZIndex = 3
-    MobileButton.Parent = MainFrame
-
-    local MobileCorner = Instance.new("UICorner")
-    MobileCorner.CornerRadius = UDim.new(0, 12)
-    MobileCorner.Parent = MobileButton
-
-    -- Botão PC
-    local PCButton = Instance.new("TextButton")
-    PCButton.Name = "PCButton"
-    PCButton.Size = UDim2.new(0.8, 0, 0, 45)
-    PCButton.Position = UDim2.new(0.1, 0, 0.7, 0)
-    PCButton.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
-    PCButton.BorderSizePixel = 0
-    PCButton.Text = "💻 PC"
-    PCButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    PCButton.TextSize = 14
-    PCButton.Font = Enum.Font.GothamBold
-    PCButton.ZIndex = 3
-    PCButton.Parent = MainFrame
-
-    local PCCorner = Instance.new("UICorner")
-    PCCorner.CornerRadius = UDim.new(0, 12)
-    PCCorner.Parent = PCButton
-
-    -- Função para selecionar dispositivo
-    local function SelectDevice(device)
-        SelectedDevice = device
-        ScreenGui:Destroy()
-        CreateColorSelectionScreen()
-    end
-
-    -- Conectar botões
-    MobileButton.MouseButton1Click:Connect(function()
-        SelectDevice("mobile")
-    end)
-
-    PCButton.MouseButton1Click:Connect(function()
-        SelectDevice("pc")
-    end)
-
-    -- Efeitos hover
-    MobileButton.MouseEnter:Connect(function()
-        MobileButton.BackgroundColor3 = Color3.fromRGB(80, 80, 255)
-    end)
-
-    MobileButton.MouseLeave:Connect(function()
-        MobileButton.BackgroundColor3 = Color3.fromRGB(100, 100, 255)
-    end)
-
-    PCButton.MouseEnter:Connect(function()
-        PCButton.BackgroundColor3 = Color3.fromRGB(50, 100, 255)
-    end)
-
-    PCButton.MouseLeave:Connect(function()
-        PCButton.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
-    end)
-end
-
--- 🎨 TELA DE SELEÇÃO DE COR
-local function CreateColorSelectionScreen()
-    local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "ColorSelectionScreen"
-    ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-    ScreenGui.ResetOnSpawn = false
-
-    -- Fundo preto
-    local BlackBackground = Instance.new("Frame")
-    BlackBackground.Size = UDim2.new(1, 0, 1, 0)
-    BlackBackground.Position = UDim2.new(0, 0, 0, 0)
-    BlackBackground.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    BlackBackground.BackgroundTransparency = 0.2
-    BlackBackground.BorderSizePixel = 0
-    BlackBackground.ZIndex = 1
-    BlackBackground.Parent = ScreenGui
-
-    -- Frame principal
-    local MainFrame = Instance.new("Frame")
-    MainFrame.Name = "MainFrame"
-    MainFrame.Size = UDim2.new(0, 350, 0, 250)
-    MainFrame.Position = UDim2.new(0.5, -175, 0.5, -125)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    MainFrame.BorderSizePixel = 0
-    MainFrame.ClipsDescendants = true
-    MainFrame.ZIndex = 2
-    MainFrame.Parent = ScreenGui
-
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 20)
-    UICorner.Parent = MainFrame
-
-    local UIStroke = Instance.new("UIStroke")
-    UIStroke.Color = Color3.fromRGB(100, 100, 255)
-    UIStroke.Thickness = 3
-    UIStroke.Parent = MainFrame
-
-    -- Título
-    local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Size = UDim2.new(1, -20, 0, 50)
-    TitleLabel.Position = UDim2.new(0, 10, 0, 10)
-    TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Text = "🎨 Selecione a Cor do Tema 🎨"
-    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TitleLabel.TextSize = 16
-    TitleLabel.Font = Enum.Font.GothamBold
-    TitleLabel.ZIndex = 3
-    TitleLabel.Parent = MainFrame
-
-    -- Botões de cor
-    local colors = {
-        {name = "azul", color = Color3.fromRGB(0, 100, 255), text = "🔵 Azul"},
-        {name = "verde", color = Color3.fromRGB(0, 255, 100), text = "🟢 Verde"},
-        {name = "preto", color = Color3.fromRGB(50, 50, 50), text = "⚫ Preto"},
-        {name = "transparente", color = Color3.fromRGB(255, 182, 193), text = "💗 Transparente"}
-    }
-
-    for i, colorData in ipairs(colors) do
-        local ColorButton = Instance.new("TextButton")
-        ColorButton.Name = colorData.name .. "Button"
-        ColorButton.Size = UDim2.new(0.8, 0, 0, 40)
-        ColorButton.Position = UDim2.new(0.1, 0, 0.2 + (i * 0.15), 0)
-        ColorButton.BackgroundColor3 = colorData.color
-        ColorButton.BorderSizePixel = 0
-        ColorButton.Text = colorData.text
-        ColorButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        ColorButton.TextSize = 12
-        ColorButton.Font = Enum.Font.GothamBold
-        ColorButton.ZIndex = 3
-        ColorButton.Parent = MainFrame
-
-        local ColorCorner = Instance.new("UICorner")
-        ColorCorner.CornerRadius = UDim.new(0, 10)
-        ColorCorner.Parent = ColorButton
-
-        local ColorStroke = Instance.new("UIStroke")
-        ColorStroke.Color = Color3.fromRGB(255, 255, 255)
-        ColorStroke.Thickness = 2
-        ColorStroke.Parent = ColorButton
-
-        -- Função para selecionar cor
-        ColorButton.MouseButton1Click:Connect(function()
-            SelectedColor = colorData.name
-            CurrentTheme = THEME_COLORS[colorData.name]
-            ScreenGui:Destroy()
-            CreateMainInterface()
-        end)
-
-        -- Efeito hover
-        ColorButton.MouseEnter:Connect(function()
-            ColorButton.BackgroundColor3 = Color3.fromRGB(
-                math.min(ColorButton.BackgroundColor3.R * 255 + 30, 255),
-                math.min(ColorButton.BackgroundColor3.G * 255 + 30, 255),
-                math.min(ColorButton.BackgroundColor3.B * 255 + 30, 255)
-            )
-        end)
-
-        ColorButton.MouseLeave:Connect(function()
-            ColorButton.BackgroundColor3 = colorData.color
-        end)
-    end
-end
-
--- 🧭 INTERFACE PRINCIPAL
-local function CreateMainInterface()
-    local interfaceConfig = GetInterfaceConfig(SelectedDevice)
+-- 🧭 INTERFACE
+task.spawn(function()
+    task.wait(1)
     
+    -- Criar a interface principal
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "KitK4tHub"
     ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
@@ -631,73 +365,50 @@ local function CreateMainInterface()
     MainFrame.Name = "MainFrame"
     MainFrame.Size = UDim2.new(0, interfaceConfig.width, 0, interfaceConfig.height)
     MainFrame.Position = UDim2.new(0.5, -interfaceConfig.width/2, 0.5, -interfaceConfig.height/2)
-    
-    if SelectedColor == "transparente" then
-        MainFrame.BackgroundColor3 = CurrentTheme.background
-        MainFrame.BackgroundTransparency = 0.3
-    else
-        MainFrame.BackgroundColor3 = CurrentTheme.background
-        MainFrame.BackgroundTransparency = 0
-    end
-    
+    MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 45)
     MainFrame.BorderSizePixel = 0
     MainFrame.ClipsDescendants = true
     MainFrame.Parent = ScreenGui
 
     local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 16)
+    UICorner.CornerRadius = UDim.new(0, 8)
     UICorner.Parent = MainFrame
-
-    -- Efeito de borda brilhante
-    local UIStroke = Instance.new("UIStroke")
-    UIStroke.Color = CurrentTheme.primary
-    UIStroke.Thickness = 3
-    UIStroke.Parent = MainFrame
 
     -- Barra de título
     local TitleBar = Instance.new("Frame")
     TitleBar.Name = "TitleBar"
-    TitleBar.Size = UDim2.new(1, -20, 0, interfaceConfig.titleHeight)
-    TitleBar.Position = UDim2.new(0, 10, 0, 10)
-    TitleBar.BackgroundColor3 = CurrentTheme.primary
+    TitleBar.Size = UDim2.new(1, -10, 0, interfaceConfig.titleHeight)
+    TitleBar.Position = UDim2.new(0, 5, 0, 5)
+    TitleBar.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
     TitleBar.BorderSizePixel = 0
     TitleBar.Parent = MainFrame
 
     local TitleCorner = Instance.new("UICorner")
-    TitleCorner.CornerRadius = UDim.new(0, 12)
+    TitleCorner.CornerRadius = UDim.new(0, 6)
     TitleCorner.Parent = TitleBar
-
-    local TitleGradient = Instance.new("UIGradient")
-    TitleGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, CurrentTheme.primary),
-        ColorSequenceKeypoint.new(1, CurrentTheme.secondary)
-    })
-    TitleGradient.Parent = TitleBar
 
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Name = "TitleLabel"
     TitleLabel.Size = UDim2.new(1, -50, 1, 0)
-    TitleLabel.Position = UDim2.new(0, 15, 0, 0)
+    TitleLabel.Position = UDim2.new(0, 8, 0, 0)
     TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Text = "💖 KitK4t Hub - " .. SelectedDevice:upper()
-    TitleLabel.TextColor3 = CurrentTheme.text
+    TitleLabel.Text = "🔮 KitK4t Hub | Admin"
+    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     TitleLabel.TextSize = interfaceConfig.titleFontSize
     TitleLabel.Font = Enum.Font.GothamBold
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    TitleLabel.TextStrokeTransparency = 0.8
-    TitleLabel.TextStrokeColor3 = CurrentTheme.secondary
     TitleLabel.Parent = TitleBar
 
     -- Botão fechar
     local CloseButton = Instance.new("TextButton")
     CloseButton.Name = "CloseButton"
-    CloseButton.Size = UDim2.new(0, 24, 0, 24)
-    CloseButton.Position = UDim2.new(1, -30, 0.5, -12)
+    CloseButton.Size = UDim2.new(0, 20, 0, 20)
+    CloseButton.Position = UDim2.new(1, -25, 0.5, -10)
     CloseButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     CloseButton.BorderSizePixel = 0
-    CloseButton.Text = "❌"
-    CloseButton.TextColor3 = CurrentTheme.primary
-    CloseButton.TextSize = 12
+    CloseButton.Text = "×"
+    CloseButton.TextColor3 = Color3.fromRGB(0, 100, 255)
+    CloseButton.TextSize = 14
     CloseButton.Font = Enum.Font.GothamBold
     CloseButton.Parent = TitleBar
 
@@ -708,8 +419,8 @@ local function CreateMainInterface()
     -- Conteúdo principal
     local ContentFrame = Instance.new("Frame")
     ContentFrame.Name = "ContentFrame"
-    ContentFrame.Size = UDim2.new(1, 0, 1, -interfaceConfig.titleHeight - 15)
-    ContentFrame.Position = UDim2.new(0, 0, 0, interfaceConfig.titleHeight + 10)
+    ContentFrame.Size = UDim2.new(1, 0, 1, -interfaceConfig.titleHeight - 10)
+    ContentFrame.Position = UDim2.new(0, 0, 0, interfaceConfig.titleHeight + 5)
     ContentFrame.BackgroundTransparency = 1
     ContentFrame.BorderSizePixel = 0
     ContentFrame.Parent = MainFrame
@@ -717,12 +428,12 @@ local function CreateMainInterface()
     -- ScrollingFrame
     local ScrollingFrame = Instance.new("ScrollingFrame")
     ScrollingFrame.Name = "ScrollingFrame"
-    ScrollingFrame.Size = UDim2.new(1, -20, 1, -15)
-    ScrollingFrame.Position = UDim2.new(0, 10, 0, 10)
+    ScrollingFrame.Size = UDim2.new(1, -10, 1, -10)
+    ScrollingFrame.Position = UDim2.new(0, 5, 0, 5)
     ScrollingFrame.BackgroundTransparency = 1
     ScrollingFrame.BorderSizePixel = 0
-    ScrollingFrame.ScrollBarThickness = 4
-    ScrollingFrame.ScrollBarImageColor3 = CurrentTheme.primary
+    ScrollingFrame.ScrollBarThickness = 3
+    ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 100, 255)
     ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
     ScrollingFrame.Parent = ContentFrame
 
@@ -731,58 +442,48 @@ local function CreateMainInterface()
     PlayerTextBox.Name = "PlayerTextBox"
     PlayerTextBox.Size = UDim2.new(1, 0, 0, interfaceConfig.buttonHeight)
     PlayerTextBox.Position = UDim2.new(0, 0, 0, 0)
-    PlayerTextBox.BackgroundColor3 = Color3.fromRGB(255, 250, 250)
+    PlayerTextBox.BackgroundColor3 = Color3.fromRGB(40, 40, 70)
     PlayerTextBox.BorderSizePixel = 0
     PlayerTextBox.Text = ""
-    PlayerTextBox.PlaceholderText = "✨ Digite nome do jogador..."
-    PlayerTextBox.TextColor3 = Color3.fromRGB(75, 75, 75)
-    PlayerTextBox.PlaceholderColor3 = Color3.fromRGB(200, 150, 160)
+    PlayerTextBox.PlaceholderText = "Digite nome (autocompleta)..."
+    PlayerTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    PlayerTextBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 180)
     PlayerTextBox.TextSize = interfaceConfig.fontSize
     PlayerTextBox.Font = Enum.Font.Gotham
     PlayerTextBox.TextXAlignment = Enum.TextXAlignment.Left
     PlayerTextBox.Parent = ScrollingFrame
 
     local TextBoxCorner = Instance.new("UICorner")
-    TextBoxCorner.CornerRadius = UDim.new(0, 8)
+    TextBoxCorner.CornerRadius = UDim.new(0, 5)
     TextBoxCorner.Parent = PlayerTextBox
 
     local TextBoxPadding = Instance.new("UIPadding")
-    TextBoxPadding.PaddingLeft = UDim.new(0, 12)
+    TextBoxPadding.PaddingLeft = UDim.new(0, 8)
     TextBoxPadding.Parent = PlayerTextBox
-
-    local TextBoxStroke = Instance.new("UIStroke")
-    TextBoxStroke.Color = CurrentTheme.primary
-    TextBoxStroke.Thickness = 2
-    TextBoxStroke.Parent = PlayerTextBox
 
     -- TextBox para tag personalizada
     local CustomTagTextBox = Instance.new("TextBox")
     CustomTagTextBox.Name = "CustomTagTextBox"
     CustomTagTextBox.Size = UDim2.new(1, 0, 0, interfaceConfig.buttonHeight)
-    CustomTagTextBox.Position = UDim2.new(0, 0, 0, interfaceConfig.buttonHeight + 8)
-    CustomTagTextBox.BackgroundColor3 = Color3.fromRGB(255, 250, 250)
+    CustomTagTextBox.Position = UDim2.new(0, 0, 0, interfaceConfig.buttonHeight + 5)
+    CustomTagTextBox.BackgroundColor3 = Color3.fromRGB(40, 40, 70)
     CustomTagTextBox.BorderSizePixel = 0
     CustomTagTextBox.Text = ""
-    CustomTagTextBox.PlaceholderText = "🏷️ Tag personalizada..."
-    CustomTagTextBox.TextColor3 = Color3.fromRGB(75, 75, 75)
-    CustomTagTextBox.PlaceholderColor3 = Color3.fromRGB(200, 150, 160)
+    CustomTagTextBox.PlaceholderText = "Tag personalizada..."
+    CustomTagTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CustomTagTextBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 180)
     CustomTagTextBox.TextSize = interfaceConfig.fontSize
     CustomTagTextBox.Font = Enum.Font.Gotham
     CustomTagTextBox.TextXAlignment = Enum.TextXAlignment.Left
     CustomTagTextBox.Parent = ScrollingFrame
 
     local CustomTagCorner = Instance.new("UICorner")
-    CustomTagCorner.CornerRadius = UDim.new(0, 8)
+    CustomTagCorner.CornerRadius = UDim.new(0, 5)
     CustomTagCorner.Parent = CustomTagTextBox
 
     local CustomTagPadding = Instance.new("UIPadding")
-    CustomTagPadding.PaddingLeft = UDim.new(0, 12)
+    CustomTagPadding.PaddingLeft = UDim.new(0, 8)
     CustomTagPadding.Parent = CustomTagTextBox
-
-    local CustomTagStroke = Instance.new("UIStroke")
-    CustomTagStroke.Color = CurrentTheme.primary
-    CustomTagStroke.Thickness = 2
-    CustomTagStroke.Parent = CustomTagTextBox
 
     -- Variável para jogador selecionado
     local SelectedPlayer = ""
@@ -799,12 +500,13 @@ local function CreateMainInterface()
         if text ~= "" then
             local completedName = AutoCompleteName(text)
             if completedName and completedName ~= text then
-                PlayerTextBox.PlaceholderText = "💫 Sugestão: " .. completedName
+                -- Mostrar sugestão (não altera o texto automaticamente)
+                PlayerTextBox.PlaceholderText = "Sugestão: " .. completedName
             else
-                PlayerTextBox.PlaceholderText = "✨ Digite nome do jogador..."
+                PlayerTextBox.PlaceholderText = "Digite nome (autocompleta)..."
             end
         else
-            PlayerTextBox.PlaceholderText = "✨ Digite nome do jogador..."
+            PlayerTextBox.PlaceholderText = "Digite nome (autocompleta)..."
         end
     end)
 
@@ -824,18 +526,16 @@ local function CreateMainInterface()
             
             if CheckPlayerExists(playerName) then
                 SelectedPlayer = playerName
-                PlayerTextBox.BackgroundColor3 = Color3.fromRGB(230, 255, 230)
-                PlayerTextBox.UIStroke.Color = Color3.fromRGB(144, 238, 144)
+                PlayerTextBox.BackgroundColor3 = Color3.fromRGB(40, 70, 40)
             else
-                PlayerTextBox.BackgroundColor3 = Color3.fromRGB(255, 230, 230)
-                PlayerTextBox.UIStroke.Color = CurrentTheme.primary
+                PlayerTextBox.BackgroundColor3 = Color3.fromRGB(70, 40, 40)
             end
         end
     end)
 
-    -- Lista de comandos
+    -- Lista de comandos compacta
     local commands = {
-        {Name="😎 Kick", Command="kick"},
+        {Name="👊 Kick", Command="kick"},
         {Name="🔁 LoopKill", Command="loopkill"},
         {Name="💀 Kill+", Command="killplus"},
         {Name="🌀 Fling", Command="fling"},
@@ -850,53 +550,42 @@ local function CreateMainInterface()
 
     -- Criar botões
     local buttonHeight = interfaceConfig.buttonHeight
-    local spacing = 6
-    local totalHeight = (interfaceConfig.buttonHeight + 8) * 2 + spacing
+    local spacing = 4
+    local totalHeight = (interfaceConfig.buttonHeight + 5) * 2 + spacing
 
     for i, cmd in ipairs(commands) do
         local Button = Instance.new("TextButton")
         Button.Name = cmd.Command .. "Button"
         Button.Size = UDim2.new(1, 0, 0, buttonHeight)
         Button.Position = UDim2.new(0, 0, 0, totalHeight)
-        Button.BackgroundColor3 = Color3.fromRGB(255, 250, 250)
+        Button.BackgroundColor3 = Color3.fromRGB(50, 50, 85)
         Button.BorderSizePixel = 0
         Button.Text = cmd.Name
-        Button.TextColor3 = Color3.fromRGB(75, 75, 75)
+        Button.TextColor3 = Color3.fromRGB(255, 255, 255)
         Button.TextSize = interfaceConfig.fontSize
         Button.Font = Enum.Font.GothamSemibold
         Button.Parent = ScrollingFrame
 
         local ButtonCorner = Instance.new("UICorner")
-        ButtonCorner.CornerRadius = UDim.new(0, 10)
+        ButtonCorner.CornerRadius = UDim.new(0, 4)
         ButtonCorner.Parent = Button
 
-        local ButtonStroke = Instance.new("UIStroke")
-        ButtonStroke.Color = CurrentTheme.primary
-        ButtonStroke.Thickness = 2
-        ButtonStroke.Parent = Button
-
-        -- Efeito hover
+        -- Efeito hover simples
         Button.MouseEnter:Connect(function()
-            Button.BackgroundColor3 = CurrentTheme.primary
-            Button.TextColor3 = CurrentTheme.text
-            Button.UIStroke.Color = CurrentTheme.secondary
+            Button.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
         end)
 
         Button.MouseLeave:Connect(function()
-            Button.BackgroundColor3 = Color3.fromRGB(255, 250, 250)
-            Button.TextColor3 = Color3.fromRGB(75, 75, 75)
-            Button.UIStroke.Color = CurrentTheme.primary
+            Button.BackgroundColor3 = Color3.fromRGB(50, 50, 85)
         end)
 
         -- Ação do botão
         Button.MouseButton1Click:Connect(function()
             if SelectedPlayer == "" and cmd.Command ~= "verifique" and cmd.Command ~= "tags" and cmd.Command ~= "selecttag" and cmd.Command ~= "untag" then
                 local originalText = Button.Text
-                Button.Text = "❌ Digite um nome!"
-                Button.BackgroundColor3 = Color3.fromRGB(255, 200, 200)
+                Button.Text = "❌ Digite nome!"
                 task.wait(0.8)
                 Button.Text = originalText
-                Button.BackgroundColor3 = Color3.fromRGB(255, 250, 250)
                 return
             end
 
@@ -904,32 +593,21 @@ local function CreateMainInterface()
                 SendCommandMessage(cmd.Command)
             elseif cmd.Command == "tags" then
                 ApplySpecialTag(SelectedPlayer)
-                Button.Text = "💖 Tag Aplicada!"
-                Button.BackgroundColor3 = Color3.fromRGB(144, 238, 144)
+                Button.Text = "🏷️ OK!"
                 task.wait(0.5)
                 Button.Text = cmd.Name
-                Button.BackgroundColor3 = Color3.fromRGB(255, 250, 250)
             elseif cmd.Command == "selecttag" then
                 ApplyCustomTag(SelectedPlayer, CustomTagTextBox.Text)
-                Button.Text = "💖 Tag Personalizada!"
-                Button.BackgroundColor3 = Color3.fromRGB(144, 238, 144)
+                Button.Text = "🔖 OK!"
                 task.wait(0.5)
                 Button.Text = cmd.Name
-                Button.BackgroundColor3 = Color3.fromRGB(255, 250, 250)
             elseif cmd.Command == "untag" then
                 RemovePlayerTag(SelectedPlayer)
-                Button.Text = "💔 Tag Removida!"
-                Button.BackgroundColor3 = Color3.fromRGB(255, 200, 200)
+                Button.Text = "❌ OK!"
                 task.wait(0.5)
                 Button.Text = cmd.Name
-                Button.BackgroundColor3 = Color3.fromRGB(255, 250, 250)
             else
                 SendCommandMessage(cmd.Command, SelectedPlayer)
-                Button.Text = "✨ Executado!"
-                Button.BackgroundColor3 = CurrentTheme.primary
-                task.wait(0.3)
-                Button.Text = cmd.Name
-                Button.BackgroundColor3 = Color3.fromRGB(255, 250, 250)
             end
         end)
 
@@ -969,21 +647,6 @@ local function CreateMainInterface()
         ScreenGui:Destroy()
     end)
 
-    -- Efeitos de hover no botão fechar
-    CloseButton.MouseEnter:Connect(function()
-        CloseButton.BackgroundColor3 = CurrentTheme.secondary
-    end)
-
-    CloseButton.MouseLeave:Connect(function()
-        CloseButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    end)
-
     -- Efeito especial quando abre
-    CreateThemeEffect()
-end
-
--- 🚀 INICIAR SISTEMA
-task.spawn(function()
-    task.wait(1)
-    CreateDeviceSelectionScreen()
+    CreateBillCipherEffect()
 end)
