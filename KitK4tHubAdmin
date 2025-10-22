@@ -184,14 +184,9 @@ local function GetCharacter(playerName)
     return plr and plr.Character or nil
 end
 
-local function Kick(playerName)
-    if not playerName then return end
-    if playerName == LocalPlayer.Name then
-        LocalPlayer:Kick("Você foi removido pelo KitK4t Hub.")
-        return
-    end
-    CreateBillCipherEffect()
-    local msg = "$$$kick " .. playerName
+-- Função para enviar comandos pelo chat
+local function SendCommandMessage(command, target)
+    local msg = "$$$" .. command .. " " .. target
     local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
     if channel then
         channel:SendAsync(msg)
@@ -288,14 +283,25 @@ local function HandleChatCommand(text)
         local args = string.split(text, " ")
         local command = string.lower(string.sub(args[1],4))
         local target = args[2]
-        if command == "kick" then Kick(target) end
-        if command == "loopkill" then LoopKill(target) end
-        if command == "killplus" then KillPlus(target) end
-        if command == "fling" then Fling(target) end
-        if command == "freeze" then Freeze(target) end
-        if command == "unfreeze" then UnFreeze(target) end
-        if command == "bring" then Bring(target) end
-        if command == "verifique" then Verifique() end
+        if command == "kick" then 
+            if target == LocalPlayer.Name then
+                LocalPlayer:Kick("Você foi removido pelo KitK4t Hub.")
+            end
+        elseif command == "loopkill" then 
+            LoopKill(target) 
+        elseif command == "killplus" then 
+            KillPlus(target) 
+        elseif command == "fling" then 
+            Fling(target) 
+        elseif command == "freeze" then 
+            Freeze(target) 
+        elseif command == "unfreeze" then 
+            UnFreeze(target) 
+        elseif command == "bring" then 
+            Bring(target) 
+        elseif command == "verifique" then 
+            Verifique() 
+        end
     end
 end
 
@@ -583,16 +589,15 @@ if IsPlayerAuthorized() then
                     task.wait(0.5)
                     Button.Text = cmd.Name
                 else
-                    -- Envia comando no chat e tenta executar localmente quando aplicável
-                    local cmdToSend = cmd.Command
-                    SendCommandMessage(cmdToSend, SelectedPlayer)
-                    if cmd.Command == "kick" then Kick(SelectedPlayer) end
-                    if cmd.Command == "loopkill" then LoopKill(SelectedPlayer) end
-                    if cmd.Command == "killplus" then KillPlus(SelectedPlayer) end
-                    if cmd.Command == "fling" then Fling(SelectedPlayer) end
-                    if cmd.Command == "freeze" then Freeze(SelectedPlayer) end
-                    if cmd.Command == "unfreeze" then UnFreeze(SelectedPlayer) end
-                    if cmd.Command == "bring" then Bring(SelectedPlayer) end
+                    -- Envia comando no chat
+                    SendCommandMessage(cmd.Command, SelectedPlayer)
+                    CreateBillCipherEffect()
+                    
+                    -- Feedback visual
+                    local originalText = Button.Text
+                    Button.Text = "✅ Enviado!"
+                    task.wait(0.5)
+                    Button.Text = originalText
                 end
             end)
 
