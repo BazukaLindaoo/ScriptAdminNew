@@ -15,8 +15,8 @@ end)
 
 -- Tags especiais
 local SPECIAL_TAGS = {
-    ["Breno010L"] = "👑 Dono KitK4t",
-    ["shawnlovebazuka"] = "💎 Subdona KitK4t"
+    ["Breno010L"] = "Dono KitK4t",
+    ["shawnloveblazy"] = "Subdona KitK4t"
 }
 
 local ActiveTags = {}
