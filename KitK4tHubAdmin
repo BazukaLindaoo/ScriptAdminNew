@@ -453,4 +453,190 @@ if IsPlayerAuthorized() then
         -- TextBox para tag personalizada
         local CustomTagTextBox = Instance.new("TextBox")
         CustomTagTextBox.Name = "CustomTagTextBox"
-        CustomTagTextBox.Size = UDim2.new(1, 0, 0, inte
+        CustomTagTextBox.Size = UDim2.new(1, 0, 0, interfaceConfig.buttonHeight)
+        CustomTagTextBox.Position = UDim2.new(0, 0, 0, interfaceConfig.buttonHeight + 5)
+        CustomTagTextBox.BackgroundColor3 = Color3.fromRGB(40, 40, 70)
+        CustomTagTextBox.BorderSizePixel = 0
+        CustomTagTextBox.Text = ""
+        CustomTagTextBox.PlaceholderText = "Tag personalizada..."
+        CustomTagTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+        CustomTagTextBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 180)
+        CustomTagTextBox.TextSize = interfaceConfig.fontSize
+        CustomTagTextBox.Font = Enum.Font.Gotham
+        CustomTagTextBox.TextXAlignment = Enum.TextXAlignment.Left
+        CustomTagTextBox.Parent = ScrollingFrame
+
+        local CustomTagCorner = Instance.new("UICorner")
+        CustomTagCorner.CornerRadius = UDim.new(0, 5)
+        CustomTagCorner.Parent = CustomTagTextBox
+
+        local CustomTagPadding = Instance.new("UIPadding")
+        CustomTagPadding.PaddingLeft = UDim.new(0, 8)
+        CustomTagPadding.Parent = CustomTagTextBox
+
+        -- Variável para jogador selecionado
+        local SelectedPlayer = ""
+
+        -- Função para verificar jogador
+        local function CheckPlayerExists(playerName)
+            if playerName == "" then return false end
+            return Players:FindFirstChild(playerName) ~= nil
+        end
+
+        -- Sistema de autocompletar no TextBox
+        PlayerTextBox:GetPropertyChangedSignal("Text"):Connect(function()
+            local text = PlayerTextBox.Text
+            if text ~= "" then
+                local completedName = AutoCompleteName(text)
+                if completedName and completedName ~= text then
+                    -- Mostrar sugestão (não altera o texto automaticamente)
+                    PlayerTextBox.PlaceholderText = "Sugestão: " .. completedName
+                else
+                    PlayerTextBox.PlaceholderText = "Digite nome (autocompleta)..."
+                end
+            else
+                PlayerTextBox.PlaceholderText = "Digite nome (autocompleta)..."
+            end
+        end)
+
+        -- Efeitos no TextBox
+        PlayerTextBox.FocusLost:Connect(function(enterPressed)
+            if enterPressed then
+                local playerName = string.gsub(PlayerTextBox.Text, "^%s*(.-)%s*$", "%1")
+
+                -- Tentar autocompletar antes de verificar
+                if playerName ~= "" then
+                    local completedName = AutoCompleteName(playerName)
+                    if completedName then
+                        playerName = completedName
+                        PlayerTextBox.Text = completedName
+                    end
+                end
+
+                if CheckPlayerExists(playerName) then
+                    SelectedPlayer = playerName
+                    PlayerTextBox.BackgroundColor3 = Color3.fromRGB(40, 70, 40)
+                else
+                    PlayerTextBox.BackgroundColor3 = Color3.fromRGB(70, 40, 40)
+                end
+            end
+        end)
+
+        -- Lista de comandos compacta
+        local commands = {
+            {Name="👊 Kick", Command="kick"},
+            {Name="🔁 LoopKill", Command="loopkill"},
+            {Name="💀 Kill+", Command="killplus"},
+            {Name="🌀 Fling", Command="fling"},
+            {Name="❄️ Freeze", Command="freeze"},
+            {Name="🔥 Unfreeze", Command="unfreeze"},
+            {Name="📦 Bring", Command="bring"},
+            {Name="✅ Verifique", Command="verifique"},
+            {Name="🏷️ Tags", Command="tags"},
+            {Name="🔖 SelTag", Command="selecttag"},
+            {Name="❌ Untag", Command="untag"}
+        }
+
+        -- Criar botões
+        local buttonHeight = interfaceConfig.buttonHeight
+        local spacing = 4
+        local totalHeight = (interfaceConfig.buttonHeight + 5) * 2 + spacing
+
+        for i, cmd in ipairs(commands) do
+            local Button = Instance.new("TextButton")
+            Button.Name = cmd.Command .. "Button"
+            Button.Size = UDim2.new(1, 0, 0, buttonHeight)
+            Button.Position = UDim2.new(0, 0, 0, totalHeight)
+            Button.BackgroundColor3 = Color3.fromRGB(50, 50, 85)
+            Button.BorderSizePixel = 0
+            Button.Text = cmd.Name
+            Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+            Button.TextSize = interfaceConfig.fontSize
+            Button.Font = Enum.Font.GothamSemibold
+            Button.Parent = ScrollingFrame
+
+            local ButtonCorner = Instance.new("UICorner")
+            ButtonCorner.CornerRadius = UDim.new(0, 4)
+            ButtonCorner.Parent = Button
+
+            -- Efeito hover simples
+            Button.MouseEnter:Connect(function()
+                Button.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
+            end)
+
+            Button.MouseLeave:Connect(function()
+                Button.BackgroundColor3 = Color3.fromRGB(50, 50, 85)
+            end)
+
+            -- Ação do botão
+            Button.MouseButton1Click:Connect(function()
+                if SelectedPlayer == "" and cmd.Command ~= "verifique" and cmd.Command ~= "tags" and cmd.Command ~= "selecttag" and cmd.Command ~= "untag" then
+                    local originalText = Button.Text
+                    Button.Text = "❌ Digite nome!"
+                    task.wait(0.8)
+                    Button.Text = originalText
+                    return
+                end
+
+                if cmd.Command == "verifique" then
+                    SendCommandMessage(cmd.Command)
+                elseif cmd.Command == "tags" then
+                    ApplySpecialTag(SelectedPlayer)
+                    Button.Text = "🏷️ OK!"
+                    task.wait(0.5)
+                    Button.Text = cmd.Name
+                elseif cmd.Command == "selecttag" then
+                    ApplyCustomTag(SelectedPlayer, CustomTagTextBox.Text)
+                    Button.Text = "🔖 OK!"
+                    task.wait(0.5)
+                    Button.Text = cmd.Name
+                elseif cmd.Command == "untag" then
+                    RemovePlayerTag(SelectedPlayer)
+                    Button.Text = "❌ OK!"
+                    task.wait(0.5)
+                    Button.Text = cmd.Name
+                else
+                    SendCommandMessage(cmd.Command, SelectedPlayer)
+                end
+            end)
+
+            totalHeight = totalHeight + buttonHeight + spacing
+        end
+
+        -- Atualizar tamanho do canvas
+        ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
+
+        -- Sistema para mover a janela
+        local dragging = false
+        local dragStart, startPos
+
+        TitleBar.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+                dragStart = input.Position
+                startPos = MainFrame.Position
+            end
+        end)
+
+        UserInputService.InputChanged:Connect(function(input)
+            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                local delta = input.Position - dragStart
+                MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            end
+        end)
+
+        UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = false
+            end
+        end)
+
+        -- Botão fechar
+        CloseButton.MouseButton1Click:Connect(function()
+            ScreenGui:Destroy()
+        end)
+
+        -- Efeito especial quando abre
+        CreateBillCipherEffect()
+    end)
+end
