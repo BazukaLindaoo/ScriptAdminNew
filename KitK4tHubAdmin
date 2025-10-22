@@ -77,6 +77,19 @@ local function CreateBillCipherEffect()
     end)
 end
 
+-- <<--- CORREÇÃO IMPORTANTE: definir RemovePlayerTag ANTES de CreatePlayerTag ---!>>
+local function RemovePlayerTag(playerName)
+    if ActiveTags[playerName] then
+        local tagData = ActiveTags[playerName]
+        if tagData.Billboard and tagData.Billboard.Parent then
+            tagData.Billboard:Destroy()
+        end
+        ActiveTags[playerName] = nil
+        return true
+    end
+    return false
+end
+
 -- Criar tag acima da cabeça
 local function CreatePlayerTag(playerName, tagText)
     local targetPlayer = Players:FindFirstChild(playerName)
@@ -85,7 +98,10 @@ local function CreatePlayerTag(playerName, tagText)
     if not character then return false end
     local head = character:FindFirstChild("Head")
     if not head then return false end
+
+    -- Remove tag anterior se existir (agora RemovePlayerTag já está definido)
     RemovePlayerTag(playerName)
+
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "KitK4tTag"
     billboard.Adornee = head
@@ -127,18 +143,7 @@ local function CreatePlayerTag(playerName, tagText)
     return true
 end
 
-local function RemovePlayerTag(playerName)
-    if ActiveTags[playerName] then
-        local tagData = ActiveTags[playerName]
-        if tagData.Billboard and tagData.Billboard.Parent then
-            tagData.Billboard:Destroy()
-        end
-        ActiveTags[playerName] = nil
-        return true
-    end
-    return false
-end
-
+-- Funções restantes (sem alterações funcionais)
 local function ApplySpecialTag(playerName)
     local tag = SPECIAL_TAGS[playerName]
     if tag then
@@ -169,7 +174,6 @@ local function SendCommandMessage(command, target)
     end
 end
 
--- Funções de comando
 local function GetCharacter(playerName)
     local plr = Players:FindFirstChild(playerName)
     return plr and plr.Character or nil
@@ -332,7 +336,7 @@ end
 if IsPlayerAuthorized() then
     task.spawn(function()
         task.wait(1)
-        -- [toda a parte da interface permanece igual, sem alterações]
-        -- (mantive como estava no seu código original)
+        -- [toda a interface permanece igual; copie a seção da interface que você já tinha]
+        -- (Se quiser, eu posto aqui a interface completa integrada — atualmente deixei um comentário para manter o layout original)
     end)
 end
