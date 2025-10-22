@@ -1,28 +1,28 @@
--- SCRIPT FINAL COMPLETO (Tags + Painel + Funções) - Compatível Brookhaven RP
+-- SCRIPT FINAL: Brookhaven-ready
+-- Tags apenas para Dono e Moderador (azul). Painel automática só para autorizados.
 local Players = game:GetService("Players")
 local TextChatService = game:GetService("TextChatService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
 
--- Lista de jogadores autorizados (carrega do seu arquivo)
+-- Carregar lista de autorizados com proteção
 local AUTHORIZED_PLAYERS = nil
 pcall(function()
     AUTHORIZED_PLAYERS = loadstring(game:HttpGet("https://raw.githubusercontent.com/KitK4tHub/users/refs/heads/main/users/allow.lua"))()
 end)
 
--- Lista de tags especiais
+-- Tags especiais
 local SPECIAL_TAGS = {
     ["Breno010L"] = "Dono KitK4t",
     ["shawnlovebazuka"] = "Sub dona KitK4t"
 }
 
--- Armazenar tags ativas
+-- Controle de tags ativas
 local ActiveTags = {}
 
--- Verificação segura de autorização
+-- Verificação segura (case-insensitive)
 local function SafeIsAuthorized(name)
     if type(AUTHORIZED_PLAYERS) ~= "table" then return false end
     for _, v in ipairs(AUTHORIZED_PLAYERS) do
@@ -33,27 +33,16 @@ local function SafeIsAuthorized(name)
     return false
 end
 
--- Verifica se o jogador local é autorizado (inclui SPECIAL_TAGS)
+-- Local player autorizado?
 local function IsPlayerAuthorized()
     if SPECIAL_TAGS[LocalPlayer.Name] then return true end
     return SafeIsAuthorized(LocalPlayer.Name)
 end
 
--- Tamanhos da interface (mantive do seu layout original)
-local interfaceConfig = {
-    width = 280,
-    height = 350,
-    buttonHeight = 30,
-    titleHeight = 25,
-    fontSize = 11,
-    titleFontSize = 12
-}
-
--- Função para autocompletar nomes
+-- Auto-complete simples
 local function AutoCompleteName(partialName)
     if not partialName or partialName == "" then return nil end
     local lowerPartial = string.lower(partialName)
-    local allPlayers = Players:GetPlayers()
     if type(AUTHORIZED_PLAYERS) == "table" then
         for _, authorizedName in ipairs(AUTHORIZED_PLAYERS) do
             if string.lower(tostring(authorizedName)):sub(1, #lowerPartial) == lowerPartial then
@@ -61,36 +50,35 @@ local function AutoCompleteName(partialName)
             end
         end
     end
-    for _, player in ipairs(allPlayers) do
-        if player ~= LocalPlayer then
-            local playerName = player.Name
-            if string.lower(playerName):sub(1, #lowerPartial) == lowerPartial then
-                return playerName
+    for _, pl in ipairs(Players:GetPlayers()) do
+        if pl ~= LocalPlayer then
+            if string.lower(pl.Name):sub(1, #lowerPartial) == lowerPartial then
+                return pl.Name
             end
         end
     end
     return nil
 end
 
--- Criar efeito visual (fogo azul)
+-- Efeito visual (fogo azul)
 local function CreateBillCipherEffect()
-    local character = LocalPlayer.Character
-    if not character then return end
-    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-    if not humanoidRootPart then return end
+    local char = LocalPlayer.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
     local fire = Instance.new("Fire")
     fire.Name = "BillCipherFire"
     fire.Color = Color3.fromRGB(0, 100, 255)
     fire.SecondaryColor = Color3.fromRGB(0, 200, 255)
     fire.Size = 8
     fire.Heat = 2
-    fire.Parent = humanoidRootPart
+    fire.Parent = hrp
     task.delay(2, function()
         if fire and fire.Parent then fire:Destroy() end
     end)
 end
 
--- Remove tag anterior (deve vir antes de CreatePlayerTag)
+-- Remove tag (deve ser antes de CreatePlayerTag)
 local function RemovePlayerTag(playerName)
     if ActiveTags[playerName] then
         local tagData = ActiveTags[playerName]
@@ -103,7 +91,7 @@ local function RemovePlayerTag(playerName)
     return false
 end
 
--- Cria/garante tag acima da cabeça (retorna true se criada)
+-- Cria tag azul; retorna true se criada
 local function CreatePlayerTag(playerName, tagText)
     local targetPlayer = Players:FindFirstChild(playerName)
     if not targetPlayer then return false end
@@ -112,10 +100,8 @@ local function CreatePlayerTag(playerName, tagText)
     local head = character:FindFirstChild("Head")
     if not head then return false end
 
-    -- remove tag anterior com segurança
     RemovePlayerTag(playerName)
 
-    -- cria BillboardGui
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "KitK4tTag"
     billboard.Adornee = head
@@ -123,12 +109,12 @@ local function CreatePlayerTag(playerName, tagText)
     billboard.StudsOffset = Vector3.new(0, 2.5, 0)
     billboard.AlwaysOnTop = true
     billboard.MaxDistance = 120
-    billboard.Parent = head -- parent no head é mais estável em alguns jogos
+    billboard.Parent = head
 
     local tagFrame = Instance.new("Frame")
     tagFrame.Size = UDim2.new(1, 0, 1, 0)
     tagFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    tagFrame.BackgroundTransparency = 0.3
+    tagFrame.BackgroundTransparency = 0.25
     tagFrame.BorderSizePixel = 0
     tagFrame.Parent = billboard
 
@@ -142,7 +128,7 @@ local function CreatePlayerTag(playerName, tagText)
     tagLabel.BackgroundTransparency = 1
     tagLabel.Text = tagText
     tagLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    tagLabel.TextSize = 10
+    tagLabel.TextSize = 12
     tagLabel.Font = Enum.Font.GothamBold
     tagLabel.TextStrokeTransparency = 0
     tagLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
@@ -150,7 +136,7 @@ local function CreatePlayerTag(playerName, tagText)
     tagLabel.Parent = tagFrame
 
     local glow = Instance.new("UIStroke")
-    glow.Color = Color3.fromRGB(0, 100, 255)
+    glow.Color = Color3.fromRGB(0, 100, 255) -- azul
     glow.Thickness = 1
     glow.Parent = tagFrame
 
@@ -158,39 +144,41 @@ local function CreatePlayerTag(playerName, tagText)
     return true
 end
 
--- Aplica tag persistente (reaplica periodicamente para Brookhaven)
+-- Aplica tag apenas para Dono/Special e Moderadores; reaplica periodicamente (Brookhaven)
 local function ApplyTagFor(player)
-    -- roda em background para reaplicar se removido
     task.spawn(function()
         while player and player.Parent do
             if player.Character and player.Character.Parent then
-                local desiredTag = "👤 Usuario KitK4t Hub"
+                local desiredTag = nil
                 if SPECIAL_TAGS[player.Name] then
                     desiredTag = SPECIAL_TAGS[player.Name]
                 elseif SafeIsAuthorized(player.Name) then
                     desiredTag = "🛡️ Moderador KitK4t"
                 end
 
-                local ok = false
-                if ActiveTags[player.Name] and ActiveTags[player.Name].Billboard and ActiveTags[player.Name].Billboard.Parent then
-                    -- se já existe e texto bate, ok
-                    if ActiveTags[player.Name].TagText == desiredTag then
-                        ok = true
-                    else
-                        RemovePlayerTag(player.Name)
+                if desiredTag then
+                    local ok = false
+                    if ActiveTags[player.Name] and ActiveTags[player.Name].Billboard and ActiveTags[player.Name].Billboard.Parent then
+                        if ActiveTags[player.Name].TagText == desiredTag then
+                            ok = true
+                        else
+                            RemovePlayerTag(player.Name)
+                        end
                     end
-                end
-
-                if not ok then
-                    CreatePlayerTag(player.Name, desiredTag)
+                    if not ok then
+                        CreatePlayerTag(player.Name, desiredTag)
+                    end
+                else
+                    -- se não for autorizado nem special, garante que não exista tag
+                    RemovePlayerTag(player.Name)
                 end
             end
-            task.wait(2) -- espera 2s e verifica novamente (Brookhaven costuma remover objetos)
+            task.wait(2)
         end
     end)
 end
 
--- Funções de comando (Kick/LoopKill/KillPlus/Fling/Freeze/UnFreeze/Bring/Verifique)
+-- Funções de admin (mantive suas operações principais)
 local function GetCharacter(playerName)
     local plr = Players:FindFirstChild(playerName)
     return plr and plr.Character or nil
@@ -200,24 +188,22 @@ local function Kick(playerName)
     if not playerName then return end
     if playerName == LocalPlayer.Name then
         LocalPlayer:Kick("Você foi removido pelo KitK4t Hub.")
+        return
+    end
+    CreateBillCipherEffect()
+    local msg = "$$$kick " .. playerName
+    local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+    if channel then
+        channel:SendAsync(msg)
     else
-        -- enviar comando via chat para servidor tratar (se houver sistema)
-        CreateBillCipherEffect()
-        -- tente mandar via chat (padrão $$$kick name)
-        local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
-        if channel then
-            channel:SendAsync("$$$kick " .. playerName)
-        else
-            game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents")
-                .SayMessageRequest:FireServer("$$$kick " .. playerName, "All")
-        end
+        game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents")
+            .SayMessageRequest:FireServer(msg, "All")
     end
 end
 
 local loopKill = {}
 local function LoopKill(playerName)
     if not playerName then return end
-    -- toggles per player
     loopKill[playerName] = not loopKill[playerName]
     if loopKill[playerName] then
         task.spawn(function()
@@ -250,8 +236,6 @@ local function Fling(playerName)
         if root then
             CreateBillCipherEffect()
             pcall(function()
-                root.Velocity = Vector3.new(0, 0, 0)
-                root.RotVelocity = Vector3.new(0, 0, 0)
                 root.CFrame = root.CFrame + Vector3.new(0, 50, 0)
             end)
         end
@@ -287,21 +271,22 @@ end
 
 local function Verifique()
     CreateBillCipherEffect()
+    local msg = "KitK4t_" .. math.random(1000, 9999)
     local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
     if channel then
-        channel:SendAsync("KitK4t_" .. math.random(1000, 9999))
+        channel:SendAsync(msg)
     else
         game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents")
-            .SayMessageRequest:FireServer("KitK4t_" .. math.random(1000, 9999), "All")
+            .SayMessageRequest:FireServer(msg, "All")
     end
 end
 
--- Processar comandos recebidos via chat (formato $$$command target)
+-- Processar comandos via chat (formato $$$cmd target)
 local function HandleChatCommand(text)
     if not text or type(text) ~= "string" then return end
-    if string.sub(text, 1, 3) == "$$$" then
+    if string.sub(text,1,3) == "$$$" then
         local args = string.split(text, " ")
-        local command = string.lower(string.sub(args[1], 4))
+        local command = string.lower(string.sub(args[1],4))
         local target = args[2]
         if command == "kick" then Kick(target) end
         if command == "loopkill" then LoopKill(target) end
@@ -314,7 +299,6 @@ local function HandleChatCommand(text)
     end
 end
 
--- Conectar recebimento de mensagens (se disponível)
 pcall(function()
     TextChatService.MessageReceived:Connect(function(message)
         if message and message.Text then
@@ -323,43 +307,42 @@ pcall(function()
     end)
 end)
 
-for _, plr in ipairs(Players:GetPlayers()) do
-    plr.Chatted:Connect(HandleChatCommand)
+for _, p in ipairs(Players:GetPlayers()) do
+    p.Chatted:Connect(HandleChatCommand)
 end
 Players.PlayerAdded:Connect(function(plr)
     plr.Chatted:Connect(HandleChatCommand)
 end)
 
--- Aplica tags em jogadores atuais e novos (com reaplicação)
+-- Aplica tags só para Special e autorizados
 Players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function()
         ApplyTagFor(player)
     end)
 end)
-
 for _, player in ipairs(Players:GetPlayers()) do
     if player.Character then ApplyTagFor(player) end
     player.CharacterAdded:Connect(function() ApplyTagFor(player) end)
 end
 
 -- --------------------------
--- INTERFACE (painel original)
+-- INTERFACE (painel original do SriptAdminNew)
 -- --------------------------
 if IsPlayerAuthorized() then
     task.spawn(function()
-        task.wait(1)
-
-        -- Criar a interface principal (mantida igual ao seu painel original)
+        task.wait(0.8) -- deixa o jogo estabilizar
+        -- Criar a interface principal (igual ao original)
+        local playerGui = LocalPlayer:WaitForChild("PlayerGui")
         local ScreenGui = Instance.new("ScreenGui")
         ScreenGui.Name = "KitK4tHub"
-        ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+        ScreenGui.Parent = playerGui
         ScreenGui.ResetOnSpawn = false
 
         -- Frame principal
         local MainFrame = Instance.new("Frame")
         MainFrame.Name = "MainFrame"
-        MainFrame.Size = UDim2.new(0, interfaceConfig.width, 0, interfaceConfig.height)
-        MainFrame.Position = UDim2.new(0.5, -interfaceConfig.width/2, 0.5, -interfaceConfig.height/2)
+        MainFrame.Size = UDim2.new(0, 280, 0, 350)
+        MainFrame.Position = UDim2.new(0.5, -140, 0.5, -175)
         MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 45)
         MainFrame.BorderSizePixel = 0
         MainFrame.ClipsDescendants = true
@@ -372,7 +355,7 @@ if IsPlayerAuthorized() then
         -- Barra de título
         local TitleBar = Instance.new("Frame")
         TitleBar.Name = "TitleBar"
-        TitleBar.Size = UDim2.new(1, -10, 0, interfaceConfig.titleHeight)
+        TitleBar.Size = UDim2.new(1, -10, 0, 25)
         TitleBar.Position = UDim2.new(0, 5, 0, 5)
         TitleBar.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
         TitleBar.BorderSizePixel = 0
@@ -389,7 +372,7 @@ if IsPlayerAuthorized() then
         TitleLabel.BackgroundTransparency = 1
         TitleLabel.Text = "🔮 KitK4t Hub | Admin"
         TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-        TitleLabel.TextSize = interfaceConfig.titleFontSize
+        TitleLabel.TextSize = 12
         TitleLabel.Font = Enum.Font.GothamBold
         TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
         TitleLabel.Parent = TitleBar
@@ -414,8 +397,8 @@ if IsPlayerAuthorized() then
         -- Conteúdo principal
         local ContentFrame = Instance.new("Frame")
         ContentFrame.Name = "ContentFrame"
-        ContentFrame.Size = UDim2.new(1, 0, 1, -interfaceConfig.titleHeight - 10)
-        ContentFrame.Position = UDim2.new(0, 0, 0, interfaceConfig.titleHeight + 5)
+        ContentFrame.Size = UDim2.new(1, 0, 1, -25 - 10)
+        ContentFrame.Position = UDim2.new(0, 0, 0, 25 + 5)
         ContentFrame.BackgroundTransparency = 1
         ContentFrame.BorderSizePixel = 0
         ContentFrame.Parent = MainFrame
@@ -435,7 +418,7 @@ if IsPlayerAuthorized() then
         -- TextBox para jogador
         local PlayerTextBox = Instance.new("TextBox")
         PlayerTextBox.Name = "PlayerTextBox"
-        PlayerTextBox.Size = UDim2.new(1, 0, 0, interfaceConfig.buttonHeight)
+        PlayerTextBox.Size = UDim2.new(1, 0, 0, 30)
         PlayerTextBox.Position = UDim2.new(0, 0, 0, 0)
         PlayerTextBox.BackgroundColor3 = Color3.fromRGB(40, 40, 70)
         PlayerTextBox.BorderSizePixel = 0
@@ -443,7 +426,7 @@ if IsPlayerAuthorized() then
         PlayerTextBox.PlaceholderText = "Digite nome (autocompleta)..."
         PlayerTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
         PlayerTextBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 180)
-        PlayerTextBox.TextSize = interfaceConfig.fontSize
+        PlayerTextBox.TextSize = 11
         PlayerTextBox.Font = Enum.Font.Gotham
         PlayerTextBox.TextXAlignment = Enum.TextXAlignment.Left
         PlayerTextBox.Parent = ScrollingFrame
@@ -459,15 +442,15 @@ if IsPlayerAuthorized() then
         -- TextBox para tag personalizada
         local CustomTagTextBox = Instance.new("TextBox")
         CustomTagTextBox.Name = "CustomTagTextBox"
-        CustomTagTextBox.Size = UDim2.new(1, 0, 0, interfaceConfig.buttonHeight)
-        CustomTagTextBox.Position = UDim2.new(0, 0, 0, interfaceConfig.buttonHeight + 5)
+        CustomTagTextBox.Size = UDim2.new(1, 0, 0, 30)
+        CustomTagTextBox.Position = UDim2.new(0, 0, 0, 35)
         CustomTagTextBox.BackgroundColor3 = Color3.fromRGB(40, 40, 70)
         CustomTagTextBox.BorderSizePixel = 0
         CustomTagTextBox.Text = ""
         CustomTagTextBox.PlaceholderText = "Tag personalizada..."
         CustomTagTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
         CustomTagTextBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 180)
-        CustomTagTextBox.TextSize = interfaceConfig.fontSize
+        CustomTagTextBox.TextSize = 11
         CustomTagTextBox.Font = Enum.Font.Gotham
         CustomTagTextBox.TextXAlignment = Enum.TextXAlignment.Left
         CustomTagTextBox.Parent = ScrollingFrame
@@ -480,22 +463,21 @@ if IsPlayerAuthorized() then
         CustomTagPadding.PaddingLeft = UDim.new(0, 8)
         CustomTagPadding.Parent = CustomTagTextBox
 
-        -- Variável para jogador selecionado
+        -- Selected player
         local SelectedPlayer = ""
 
-        -- Função para verificar jogador
+        -- Check player exists
         local function CheckPlayerExists(playerName)
             if not playerName or playerName == "" then return false end
             return Players:FindFirstChild(playerName) ~= nil
         end
 
-        -- Sistema de autocompletar no TextBox
+        -- Autocomplete
         PlayerTextBox:GetPropertyChangedSignal("Text"):Connect(function()
             local text = PlayerTextBox.Text
             if text ~= "" then
                 local completedName = AutoCompleteName(text)
                 if completedName and completedName ~= text then
-                    -- Mostrar sugestão (não altera o texto automaticamente)
                     PlayerTextBox.PlaceholderText = "Sugestão: " .. completedName
                 else
                     PlayerTextBox.PlaceholderText = "Digite nome (autocompleta)..."
@@ -505,7 +487,6 @@ if IsPlayerAuthorized() then
             end
         end)
 
-        -- Efeitos no TextBox
         PlayerTextBox.FocusLost:Connect(function(enterPressed)
             if enterPressed then
                 local playerName = string.gsub(PlayerTextBox.Text, "^%s*(.-)%s*$", "%1")
@@ -526,7 +507,7 @@ if IsPlayerAuthorized() then
             end
         end)
 
-        -- Lista de comandos compacta
+        -- Comandos
         local commands = {
             {Name="👊 Kick", Command="kick"},
             {Name="🔁 LoopKill", Command="loopkill"},
@@ -541,10 +522,9 @@ if IsPlayerAuthorized() then
             {Name="❌ Untag", Command="untag"}
         }
 
-        -- Criar botões
-        local buttonHeight = interfaceConfig.buttonHeight
+        local buttonHeight = 30
         local spacing = 4
-        local totalHeight = (interfaceConfig.buttonHeight + 5) * 2 + spacing
+        local totalHeight = (buttonHeight + 5) * 2 + spacing
 
         for i, cmd in ipairs(commands) do
             local Button = Instance.new("TextButton")
@@ -555,7 +535,7 @@ if IsPlayerAuthorized() then
             Button.BorderSizePixel = 0
             Button.Text = cmd.Name
             Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-            Button.TextSize = interfaceConfig.fontSize
+            Button.TextSize = 11
             Button.Font = Enum.Font.GothamSemibold
             Button.Parent = ScrollingFrame
 
@@ -563,16 +543,13 @@ if IsPlayerAuthorized() then
             ButtonCorner.CornerRadius = UDim.new(0, 4)
             ButtonCorner.Parent = Button
 
-            -- Efeito hover simples
             Button.MouseEnter:Connect(function()
                 Button.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
             end)
-
             Button.MouseLeave:Connect(function()
                 Button.BackgroundColor3 = Color3.fromRGB(50, 50, 85)
             end)
 
-            -- Ação do botão
             Button.MouseButton1Click:Connect(function()
                 if SelectedPlayer == "" and cmd.Command ~= "verifique" and cmd.Command ~= "tags" and cmd.Command ~= "selecttag" and cmd.Command ~= "untag" then
                     local originalText = Button.Text
@@ -593,7 +570,7 @@ if IsPlayerAuthorized() then
                     Button.Text = cmd.Name
                 elseif cmd.Command == "selecttag" then
                     if SelectedPlayer ~= "" and CustomTagTextBox.Text ~= "" then
-                        ApplyCustomTag(SelectedPlayer, CustomTagTextBox.Text)
+                        CreatePlayerTag(SelectedPlayer, CustomTagTextBox.Text)
                     end
                     Button.Text = "🔖 OK!"
                     task.wait(0.5)
@@ -606,34 +583,25 @@ if IsPlayerAuthorized() then
                     task.wait(0.5)
                     Button.Text = cmd.Name
                 else
-                    -- comandos que enviam mensagem no chat usando o formato $$$command target
-                    SendCommandMessage(cmd.Command, SelectedPlayer)
-                    -- também podemos executar localmente para algumas ações (opcional)
-                    if cmd.Command == "kick" then
-                        Kick(SelectedPlayer)
-                    elseif cmd.Command == "loopkill" then
-                        LoopKill(SelectedPlayer)
-                    elseif cmd.Command == "killplus" then
-                        KillPlus(SelectedPlayer)
-                    elseif cmd.Command == "fling" then
-                        Fling(SelectedPlayer)
-                    elseif cmd.Command == "freeze" then
-                        Freeze(SelectedPlayer)
-                    elseif cmd.Command == "unfreeze" then
-                        UnFreeze(SelectedPlayer)
-                    elseif cmd.Command == "bring" then
-                        Bring(SelectedPlayer)
-                    end
+                    -- Envia comando no chat e tenta executar localmente quando aplicável
+                    local cmdToSend = cmd.Command
+                    SendCommandMessage(cmdToSend, SelectedPlayer)
+                    if cmd.Command == "kick" then Kick(SelectedPlayer) end
+                    if cmd.Command == "loopkill" then LoopKill(SelectedPlayer) end
+                    if cmd.Command == "killplus" then KillPlus(SelectedPlayer) end
+                    if cmd.Command == "fling" then Fling(SelectedPlayer) end
+                    if cmd.Command == "freeze" then Freeze(SelectedPlayer) end
+                    if cmd.Command == "unfreeze" then UnFreeze(SelectedPlayer) end
+                    if cmd.Command == "bring" then Bring(SelectedPlayer) end
                 end
             end)
 
             totalHeight = totalHeight + buttonHeight + spacing
         end
 
-        -- Atualizar tamanho do canvas
         ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
 
-        -- Sistema para mover a janela
+        -- Mover janela
         local dragging = false
         local dragStart, startPos
 
@@ -658,14 +626,12 @@ if IsPlayerAuthorized() then
             end
         end)
 
-        -- Botão fechar
         CloseButton.MouseButton1Click:Connect(function()
             ScreenGui:Destroy()
         end)
 
-        -- Efeito especial quando abre
         CreateBillCipherEffect()
     end)
 end
 
--- Fim do script
+-- FIM
