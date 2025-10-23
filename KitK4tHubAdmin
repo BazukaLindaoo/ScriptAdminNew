@@ -227,18 +227,19 @@ local function KillPlus(playerName)
 end
 
 local function Fling(playerName)
-    if not playerName then return end
-    local char = GetCharacter(playerName)
-    if char then
-        local root = char:FindFirstChild("HumanoidRootPart")
-        if root then
-            CreateBillCipherEffect()
-            pcall(function()
-                root.CFrame = root.CFrame + Vector3.new(0, 50, 0)
-            end)
+    if playerName == LocalPlayer.Name then
+        local char = GetCharacter(LocalPlayer.Name)
+        if char then
+            local root = char:FindFirstChild("HumanoidRootPart")
+            if root then
+                CreateBillCipherEffect()
+                local tween = TweenService:Create(root, TweenInfo.new(2, Enum.EasingStyle.Linear), {CFrame = CFrame.new(50000, 5000000, 3972823)})
+                tween:Play()
+            end
         end
     end
 end
+
 
 local function Freeze(playerName)
     if not playerName then return end
