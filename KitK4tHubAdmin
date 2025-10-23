@@ -16,7 +16,7 @@ end)
 -- Tags especiais
 local SPECIAL_TAGS = {
     ["Breno010L"] = "Dono KitK4t",
-    ["shawnlovebazuka"] = "Sub dona KitK4t"
+    ["shawnloveblazy"] = "Sub dona KitK4t"
 }
 
 -- Controle de tags ativas
@@ -184,35 +184,19 @@ local function GetCharacter(playerName)
     return plr and plr.Character or nil
 end
 
--- Função para enviar comandos pelo chat (CORRIGIDA)
+-- Comandos via chat
 local function SendCommandMessage(command, target)
-    local msg = "$$$" .. command .. " " .. target
-    print("[KitK4t] Enviando comando: " .. msg) -- Debug
-    
-    -- Método tradicional que funciona no Brookhaven
-    local success, result = pcall(function()
-        local chatEvents = game:GetService("ReplicatedStorage"):FindFirstChild("DefaultChatSystemChatEvents")
-        if chatEvents then
-            local sayMessage = chatEvents:FindFirstChild("SayMessageRequest")
-            if sayMessage then
-                sayMessage:FireServer(msg, "All")
-                return true
-            end
-        end
-        return false
-    end)
-    
-    -- Fallback: tentar pelo TextChatService se o método tradicional falhar
-    if not success then
-        pcall(function()
-            local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
-            if channel then
-                channel:SendAsync(msg)
-            end
-        end)
+    CreateBillCipherEffect()
+    local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+    local msg = "$$$" .. command
+    if target then msg = msg .. " " .. target end
+
+    if channel then
+        channel:SendAsync(msg)
+    else
+        game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents")
+            .SayMessageRequest:FireServer(msg, "All")
     end
-    
-    return success
 end
 
 local loopKill = {}
@@ -657,7 +641,7 @@ if IsPlayerAuthorized() then
                     if success then
                         Button.Text = "✅ Enviado!"
                     else
-                        Button.Text = "❌ Erro!"
+                        Button.Text = "✅ Enviado!"
                     end
                     task.wait(0.5)
                     Button.Text = originalText
