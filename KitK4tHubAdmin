@@ -258,15 +258,11 @@ local function UnFreeze(playerName)
     end
 end
 
-local function Bring(playerName)
-    if not playerName then return end
-    local targetChar = GetCharacter(playerName)
-    local myChar = LocalPlayer.Character
-    if myChar and myChar:FindFirstChild("HumanoidRootPart") and targetChar and targetChar:FindFirstChild("HumanoidRootPart") then
-        CreateBillCipherEffect()
-        myChar.HumanoidRootPart.CFrame = targetChar.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
-    end
-end
+local targetRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            local senderRoot = sender.Character and sender.Character:FindFirstChild("HumanoidRootPart")
+            if targetRoot and senderRoot then
+                targetRoot.CFrame = senderRoot.CFrame + Vector3.new(2, 0, 0)
+            end
 
 local function Verifique()
     CreateBillCipherEffect()
